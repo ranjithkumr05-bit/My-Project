@@ -1,7 +1,9 @@
 node_modules/
 runtime.json
-diag-srv.log
-diag/
+diag-*
 *.log
 .env
+.env.local
 frontend/dist/
+api-table.tmp
+*.pid

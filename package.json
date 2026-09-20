@@ -6,11 +6,17 @@
   "description": "Customwear B2B apparel manufacturing platform - sample-data phase (no database connected).",
   "scripts": {
     "start": "node server.mjs",
-    "dev": "node --watch server.mjs",
+    "dev:backend": "node --watch server.mjs",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "install:all": "cd frontend && npm install && cd .. && npm install",
     "smoke": "node smoke.mjs",
     "hash-password": "node scripts/hash-password.mjs"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }
