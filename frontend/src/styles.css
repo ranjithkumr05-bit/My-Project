@@ -113,3 +113,108 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
   th, td { padding: 8px; }
   .kpi { font-size: 24px; }
 }
+
+/* ============ public marketing site (cw-*) ============ */
+
+.cw-site { min-height: 100vh; display: flex; flex-direction: column; }
+.cw-site > * { flex: 0 0 auto; }
+
+.cw-header {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px clamp(16px, 4vw, 48px);
+  background: rgba(10, 22, 40, .92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.cw-burger { display: none; background: none; border: 0; color: var(--gold-500); font-size: 22px; cursor: pointer; }
+.cw-nav { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.cw-nav a { color: #cdd6e4; text-decoration: none; font-weight: 600; font-size: 14px; }
+.cw-nav a:hover, .cw-nav a.active { color: var(--gold-500); }
+.cw-nav-cta { padding: 8px 14px; }
+.cw-loginlink { opacity: .75; font-size: 13px !important; }
+.cw-backlink { color: #cdd6e4; text-decoration: none; font-size: 13px; }
+.cw-backlink:hover { color: var(--gold-500); }
+
+.cw-hero {
+  display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(20px, 4vw, 56px);
+  align-items: center; padding: clamp(32px, 6vw, 80px) clamp(16px, 4vw, 48px);
+}
+.cw-kicker { color: var(--gold-500); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
+.cw-hero h1 { font-size: clamp(30px, 4.6vw, 52px); line-height: 1.12; margin: 10px 0 14px; }
+.cw-lead { color: #b9c4d6; font-size: clamp(15px, 1.6vw, 18px); max-width: 62ch; }
+.cw-hero-img { width: 100%; border-radius: 14px; box-shadow: 0 24px 60px rgba(0, 0, 0, .45); }
+
+.cw-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  padding: 0 clamp(16px, 4vw, 48px) 12px;
+}
+.cw-stat { background: var(--card, #101f38); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; }
+.cw-stat strong { color: var(--gold-500); font-size: 24px; }
+.cw-stat span { color: #b9c4d6; font-size: 13px; }
+
+.cw-section { padding: clamp(28px, 5vw, 64px) clamp(16px, 4vw, 48px); }
+.cw-page h1 { font-size: clamp(26px, 3.4vw, 40px); margin-bottom: 6px; }
+.cw-section h2 { font-size: clamp(20px, 2.6vw, 30px); margin-bottom: 16px; }
+.cw-section h3 { margin: 6px 0 4px; }
+
+.cw-cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.cw-cat { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 5; display: block; text-decoration: none; }
+.cw-cat img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.cw-cat:hover img { transform: scale(1.05); }
+.cw-cat span {
+  position: absolute; left: 10px; right: 10px; bottom: 10px;
+  background: rgba(10, 22, 40, .85); color: #fff; font-weight: 700; font-size: 13px;
+  padding: 8px 10px; border-radius: 8px;
+}
+
+.cw-cta-band { background: linear-gradient(90deg, rgba(212, 175, 55, .12), transparent); border-left: 3px solid var(--gold-500); margin: 12px clamp(16px, 4vw, 48px); border-radius: 10px; }
+
+.cw-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 3vw, 36px); align-items: start; margin-top: 14px; }
+.cw-grid2 img { width: 100%; border-radius: 12px; }
+.cw-grid2 p { color: #b9c4d6; margin: 4px 0 14px; }
+
+.cw-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+.cw-card { background: var(--card, #101f38); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; overflow: hidden; }
+.cw-card img { width: 100%; height: 160px; object-fit: cover; }
+.cw-card h3 { padding: 12px 14px 0; }
+.cw-card p { padding: 4px 14px 14px; color: #b9c4d6; font-size: 14px; }
+.cw-thanks { padding: 20px; }
+
+.cw-work { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.cw-workcard { margin: 0; border-radius: 12px; overflow: hidden; background: var(--card, #101f38); border: 1px solid rgba(255, 255, 255, .08); }
+.cw-workcard img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.cw-workcard figcaption { padding: 10px 12px 14px; }
+.cw-workcard p { color: #b9c4d6; font-size: 13px; margin-top: 2px; }
+
+.cw-posts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 14px; }
+.cw-post { background: var(--card, #101f38); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 16px; }
+.cw-post p { color: #b9c4d6; font-size: 14px; margin-top: 6px; }
+
+.cw-form { display: flex; flex-direction: column; gap: 10px; }
+.cw-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: #cdd6e4; }
+.cw-form input, .cw-form textarea {
+  background: #0c1a30; border: 1px solid rgba(255, 255, 255, .14); color: #fff;
+  border-radius: 8px; padding: 10px 12px; font: inherit;
+}
+.cw-form input:focus, .cw-form textarea:focus { outline: 2px solid var(--gold-500); border-color: transparent; }
+.cw-formerr { color: #ff8484; font-size: 13px; }
+.cw-list { padding-left: 18px; color: #b9c4d6; line-height: 1.7; }
+
+.cw-footer {
+  margin-top: auto; display: grid; grid-template-columns: 1.2fr 1fr auto; gap: 18px;
+  padding: 26px clamp(16px, 4vw, 48px); background: #081220; border-top: 1px solid rgba(255, 255, 255, .08);
+}
+.cw-footer nav { display: flex; flex-direction: column; gap: 6px; }
+.cw-footer nav a { color: #cdd6e4; text-decoration: none; font-size: 14px; }
+.cw-footer nav a:hover { color: var(--gold-500); }
+
+@media (max-width: 900px) {
+  .cw-hero { grid-template-columns: 1fr; }
+  .cw-cats, .cw-cards, .cw-work { grid-template-columns: repeat(2, 1fr); }
+  .cw-strip { grid-template-columns: repeat(2, 1fr); }
+  .cw-grid2, .cw-posts { grid-template-columns: 1fr; }
+  .cw-burger { display: block; }
+  .cw-nav { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #0a1628; flex-direction: column; align-items: flex-start; padding: 16px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .cw-nav.open { display: flex; }
+  .cw-footer { grid-template-columns: 1fr; }
+}
