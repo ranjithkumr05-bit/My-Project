@@ -4,3 +4,4 @@ diag-srv.log
 diag/
 *.log
 .env
+frontend/dist/
