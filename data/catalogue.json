@@ -1,0 +1,55 @@
+{
+  "_sample": true,
+  "_note": "Fictional demo catalogue. Prices are illustrative placeholders, not quotations.",
+  "meta": {
+    "currency": "INR",
+    "moqRules": {
+      "polo": 100,
+      "tshirt": 100,
+      "jersey": 50,
+      "hoodie": 50,
+      "uniform": 100,
+      "private-label": 300
+    },
+    "sizes": ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
+    "productionStages": [
+      { "id": "sourcing", "label": "Fabric sourcing" },
+      { "id": "cutting", "label": "Cutting" },
+      { "id": "stitching", "label": "Stitching" },
+      { "id": "branding", "label": "Printing / embroidery" },
+      { "id": "quality", "label": "Quality check" },
+      { "id": "packing", "label": "Packing" },
+      { "id": "dispatched", "label": "Dispatched" }
+    ]
+  },
+  "brandingOptions": [
+    { "id": "screen-print", "label": "Screen print", "minQty": 50, "note": "Best value for 1-3 spot colours" },
+    { "id": "embroidery", "label": "Embroidery", "minQty": 50, "note": "Chest, sleeve and back placement" },
+    { "id": "dtf", "label": "DTF transfer", "minQty": 24, "note": "Full-colour artwork, no plate cost" },
+    { "id": "sublimation", "label": "Sublimation", "minQty": 50, "note": "All-over print, polyester substrates only" },
+    { "id": "woven-label", "label": "Woven label + care tag", "minQty": 300, "note": "Private-label neck label and size tag" },
+    { "id": "hangtag", "label": "Custom hangtag", "minQty": 300, "note": "Printed card, string or pin" }
+  ],
+  "fabricOptions": [
+    { "id": "cotton-pique", "label": "Cotton piqué", "gsmRange": [200, 240] },
+    { "id": "micro-mesh", "label": "Polyester micro-mesh", "gsmRange": [140, 180] },
+    { "id": "cotton-single", "label": "Single jersey cotton", "gsmRange": [160, 220] },
+    { "id": "fleece-brushed", "label": "Brushed fleece", "gsmRange": [300, 360] },
+    { "id": "interlock", "label": "Poly interlock", "gsmRange": [180, 220] },
+    { "id": "canvas-twill", "label": "Canvas twill", "gsmRange": [240, 280] }
+  ],
+  "products": [
+    { "id": "p-polo-001", "category": "polo", "name": "Corporate Piqué Polo", "fabric": "cotton-pique", "gsm": 220, "colors": ["White", "Navy", "Bottle Green", "Charcoal"], "moq": 100, "leadTimeDays": 21, "branding": ["embroidery", "screen-print", "woven-label"], "indicativePrice": 285 },
+    { "id": "p-polo-002", "category": "polo", "name": "Performance Dry-Fit Polo", "fabric": "micro-mesh", "gsm": 160, "colors": ["White", "Black", "Royal Blue"], "moq": 100, "leadTimeDays": 18, "branding": ["sublimation", "embroidery", "screen-print"], "indicativePrice": 310 },
+    { "id": "p-tshirt-001", "category": "tshirt", "name": "Heavyweight Crew Tee", "fabric": "cotton-single", "gsm": 180, "colors": ["White", "Black", "Melange", "Navy"], "moq": 100, "leadTimeDays": 14, "branding": ["screen-print", "dtf", "woven-label"], "indicativePrice": 195 },
+    { "id": "p-tshirt-002", "category": "tshirt", "name": "Drop-Shoulder Street Tee", "fabric": "cotton-single", "gsm": 240, "colors": ["Black", "Sand", "Olive"], "moq": 100, "leadTimeDays": 16, "branding": ["dtf", "screen-print"], "indicativePrice": 240 },
+    { "id": "p-jersey-001", "category": "jersey", "name": "Sublimated Team Jersey", "fabric": "interlock", "gsm": 180, "colors": ["Custom full-colour"], "moq": 50, "leadTimeDays": 20, "branding": ["sublimation"], "indicativePrice": 365 },
+    { "id": "p-jersey-002", "category": "jersey", "name": "Cricket Match Jersey", "fabric": "micro-mesh", "gsm": 170, "colors": ["Custom full-colour"], "moq": 50, "leadTimeDays": 22, "branding": ["sublimation"], "indicativePrice": 395 },
+    { "id": "p-hoodie-001", "category": "hoodie", "name": "Fleece Pullover Hoodie", "fabric": "fleece-brushed", "gsm": 320, "colors": ["Charcoal", "Navy", "Black", "Sand"], "moq": 50, "leadTimeDays": 24, "branding": ["screen-print", "embroidery", "woven-label"], "indicativePrice": 720 },
+    { "id": "p-hoodie-002", "category": "hoodie", "name": "Zip-Through Work Hoodie", "fabric": "fleece-brushed", "gsm": 340, "colors": ["Charcoal", "Hi-Vis Orange"], "moq": 50, "leadTimeDays": 26, "branding": ["screen-print", "embroidery", "hangtag"], "indicativePrice": 845 },
+    { "id": "p-uniform-001", "category": "uniform", "name": "School Uniform Set", "fabric": "canvas-twill", "gsm": 240, "colors": ["White / Bottle Green", "White / Navy"], "moq": 100, "leadTimeDays": 28, "branding": ["embroidery", "woven-label"], "indicativePrice": 335 },
+    { "id": "p-uniform-002", "category": "uniform", "name": "Industrial Workwear Set", "fabric": "canvas-twill", "gsm": 280, "colors": ["Navy", "Charcoal"], "moq": 100, "leadTimeDays": 30, "branding": ["embroidery", "screen-print", "hangtag"], "indicativePrice": 690 },
+    { "id": "p-pl-001", "category": "private-label", "name": "Private Label Programme (full package)", "fabric": "cotton-single", "gsm": 180, "colors": ["Your specification"], "moq": 300, "leadTimeDays": 35, "branding": ["woven-label", "hangtag", "dtf"], "indicativePrice": 265 },
+    { "id": "p-pl-002", "category": "private-label", "name": "Retail-Ready Fleece Programme", "fabric": "fleece-brushed", "gsm": 320, "colors": ["Your specification"], "moq": 300, "leadTimeDays": 38, "branding": ["woven-label", "hangtag", "embroidery"], "indicativePrice": 780 }
+  ]
+}

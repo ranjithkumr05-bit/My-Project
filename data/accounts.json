@@ -1,0 +1,11 @@
+{
+  "_sample": true,
+  "_note": "Fictional demo accounts. Passwords are stored as scrypt hashes. Demo passwords are shared across roles for convenience (admin123 / buyer123) - replace with a real auth provider before production use.",
+  "users": [
+    { "id": "u-admin-1", "role": "admin", "name": "Customwear Admin", "email": "admin@customwear.sample", "customerId": null, "password": "scrypt$16384$8$1$72f6388045dc54e03931e19a0fa67922$def8b94751c920aa701b4f9d7a58d507391208a0673227d51544bc19c0f9cb8a" },
+    { "id": "u-admin-2", "role": "admin", "name": "Sales Desk", "email": "sales@customwear.sample", "customerId": null, "password": "scrypt$16384$8$1$72f6388045dc54e03931e19a0fa67922$def8b94751c920aa701b4f9d7a58d507391208a0673227d51544bc19c0f9cb8a" },
+    { "id": "u-cust-1", "role": "customer", "name": "Ranjith Kumar", "email": "buyer@greenfield.sample", "customerId": "c-1001", "password": "scrypt$16384$8$1$f97f27c081630bb8f3c4df5471356d2a$1a1f50404ece08c078baf40015d74b13897e02560bd6fd48b09e26fab51d649e" },
+    { "id": "u-cust-2", "role": "customer", "name": "Priya Balan", "email": "admin@cedargrove.sample", "customerId": "c-1005", "password": "scrypt$16384$8$1$1069de66eafe7aa95d8a358839bc0366$21041643cb105f6108572bba92143d7610faa9ae593ecf348867a6617379c33f" },
+    { "id": "u-cust-3", "role": "customer", "name": "Daniel Osei", "email": "procurement@northline.sample", "customerId": "c-1003", "password": "scrypt$16384$8$1$f97f27c081630bb8f3c4df5471356d2a$1a1f50404ece08c078baf40015d74b13897e02560bd6fd48b09e26fab51d649e" }
+  ]
+}

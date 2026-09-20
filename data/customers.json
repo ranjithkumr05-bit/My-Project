@@ -1,0 +1,12 @@
+{
+  "_sample": true,
+  "_note": "Fictional demo records. No production database is connected.",
+  "customers": [
+    { "id": "c-1001", "company": "Greenfield Apparel Co.", "contactName": "Ranjith Kumar", "email": "buyer@greenfield.sample", "phone": "+91-90000-10001", "city": "Coimbatore", "country": "IN", "tier": "key", "since": "2024-02-11" },
+    { "id": "c-1002", "company": "Sneha Retail Group", "contactName": "Sneha Iyer", "email": "sourcing@sneharetail.sample", "phone": "+91-90000-10002", "city": "Bengaluru", "country": "IN", "tier": "standard", "since": "2024-06-03" },
+    { "id": "c-1003", "company": "Northline Workwear Ltd", "contactName": "Daniel Osei", "email": "procurement@northline.sample", "phone": "+44-7700-100003", "city": "Manchester", "country": "GB", "tier": "key", "since": "2023-11-19" },
+    { "id": "c-1004", "company": "Alpine Sports Club", "contactName": "Marta Keller", "email": "kit@alpinesports.sample", "phone": "+49-151-1000004", "city": "Munich", "country": "DE", "tier": "standard", "since": "2025-01-27" },
+    { "id": "c-1005", "company": "Cedar Grove School Trust", "contactName": "Priya Balan", "email": "admin@cedargrove.sample", "phone": "+91-90000-10005", "city": "Tiruppur", "country": "IN", "tier": "standard", "since": "2024-09-15" },
+    { "id": "c-1006", "company": "Harbor Cafe Collective", "contactName": "Tom Reyes", "email": "ops@harborcafe.sample", "phone": "+1-415-000-1006", "city": "San Francisco", "country": "US", "tier": "prospect", "since": "2025-07-08" }
+  ]
+}

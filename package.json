@@ -1,0 +1,16 @@
+{
+  "name": "customwear-platform",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Customwear B2B apparel manufacturing platform - sample-data phase (no database connected).",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "smoke": "node smoke.mjs",
+    "hash-password": "node scripts/hash-password.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

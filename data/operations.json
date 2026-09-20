@@ -1,0 +1,61 @@
+{
+  "_sample": true,
+  "_note": "Fictional demo records. No production database is connected.",
+  "rfqs": [
+    {
+      "id": "rfq-2001", "customerId": "c-1001", "status": "quoted", "createdAt": "2026-09-02T09:15:00.000Z",
+      "items": [{ "productId": "p-polo-001", "category": "polo", "qty": 600, "sizes": { "S": 100, "M": 200, "L": 200, "XL": 100 }, "branding": ["embroidery"], "notes": "Left-chest logo, 4 colours" }],
+      "quotedTotal": 171000, "quoteValidUntil": "2026-10-02", "adminNote": "Sample approved on 05 Sep."
+    },
+    {
+      "id": "rfq-2002", "customerId": "c-1003", "status": "in_review", "createdAt": "2026-09-08T11:40:00.000Z",
+      "items": [{ "productId": "p-hoodie-002", "category": "hoodie", "qty": 400, "sizes": { "M": 150, "L": 150, "XL": 100 }, "branding": ["screen-print", "woven-label"], "notes": "Reflective print on sleeve" }],
+      "quotedTotal": null, "quoteValidUntil": null, "adminNote": "Awaiting fabric availability confirmation."
+    },
+    {
+      "id": "rfq-2003", "customerId": "c-1005", "status": "accepted", "createdAt": "2026-08-14T07:05:00.000Z",
+      "items": [{ "productId": "p-uniform-001", "category": "uniform", "qty": 1200, "sizes": { "S": 200, "M": 400, "L": 400, "XL": 200 }, "branding": ["embroidery"], "notes": "School crest, 2 colours" }],
+      "quotedTotal": 402000, "quoteValidUntil": "2026-09-14", "adminNote": "Converted to order ord-3003."
+    },
+    {
+      "id": "rfq-2004", "customerId": "c-1004", "status": "submitted", "createdAt": "2026-09-16T14:22:00.000Z",
+      "items": [
+        { "productId": "p-jersey-001", "category": "jersey", "qty": 45, "sizes": {}, "branding": ["sublimation"], "notes": "Home kit" },
+        { "productId": "p-tshirt-001", "category": "tshirt", "qty": 120, "sizes": { "M": 40, "L": 50, "XL": 30 }, "branding": ["dtf"], "notes": "Training tees" }
+      ],
+      "quotedTotal": null, "quoteValidUntil": null, "adminNote": "Line 1 is below the 50-piece jersey MOQ."
+    },
+    {
+      "id": "rfq-2005", "customerId": "c-1002", "status": "converted", "createdAt": "2026-07-21T06:30:00.000Z",
+      "items": [{ "productId": "p-tshirt-002", "category": "tshirt", "qty": 900, "sizes": { "S": 150, "M": 300, "L": 300, "XL": 150 }, "branding": ["screen-print"], "notes": "Front and back print" }],
+      "quotedTotal": 216000, "quoteValidUntil": "2026-08-21", "adminNote": "Repeat order from spring drop."
+    },
+    {
+      "id": "rfq-2006", "customerId": "c-1006", "status": "draft", "createdAt": "2026-09-18T10:00:00.000Z",
+      "items": [{ "productId": "p-tshirt-001", "category": "tshirt", "qty": 150, "sizes": { "M": 75, "L": 75 }, "branding": ["dtf"], "notes": "Cafe staff tees, brainstorming" }],
+      "quotedTotal": null, "quoteValidUntil": null, "adminNote": null
+    }
+  ],
+  "orders": [
+    { "id": "ord-3001", "rfqId": "rfq-2001", "customerId": "c-1001", "qty": 600, "status": "in_production", "stage": "stitching", "createdAt": "2026-09-05T08:00:00.000Z", "dueDate": "2026-09-26", "statusHistory": [{ "stage": "sourcing", "at": "2026-09-05T08:00:00.000Z" }, { "stage": "cutting", "at": "2026-09-11T09:30:00.000Z" }, { "stage": "stitching", "at": "2026-09-17T07:45:00.000Z" }] },
+    { "id": "ord-3002", "rfqId": "rfq-2002", "customerId": "c-1003", "qty": 400, "status": "on_hold", "stage": "sourcing", "createdAt": "2026-09-09T12:10:00.000Z", "dueDate": "2026-10-14", "statusHistory": [{ "stage": "sourcing", "at": "2026-09-09T12:10:00.000Z" }] },
+    { "id": "ord-3003", "rfqId": "rfq-2003", "customerId": "c-1005", "qty": 1200, "status": "in_production", "stage": "quality", "createdAt": "2026-08-18T05:20:00.000Z", "dueDate": "2026-09-22", "statusHistory": [{ "stage": "sourcing", "at": "2026-08-18T05:20:00.000Z" }, { "stage": "cutting", "at": "2026-08-25T06:00:00.000Z" }, { "stage": "stitching", "at": "2026-09-02T06:40:00.000Z" }, { "stage": "branding", "at": "2026-09-09T07:15:00.000Z" }, { "stage": "quality", "at": "2026-09-15T08:05:00.000Z" }] },
+    { "id": "ord-3004", "rfqId": "rfq-2005", "customerId": "c-1002", "qty": 900, "status": "completed", "stage": "dispatched", "createdAt": "2026-07-24T06:00:00.000Z", "dueDate": "2026-08-20", "statusHistory": [{ "stage": "sourcing", "at": "2026-07-24T06:00:00.000Z" }, { "stage": "cutting", "at": "2026-07-31T06:00:00.000Z" }, { "stage": "stitching", "at": "2026-08-07T06:00:00.000Z" }, { "stage": "branding", "at": "2026-08-12T06:00:00.000Z" }, { "stage": "quality", "at": "2026-08-16T06:00:00.000Z" }, { "stage": "packing", "at": "2026-08-18T06:00:00.000Z" }, { "stage": "dispatched", "at": "2026-08-19T06:00:00.000Z" }] }
+  ],
+  "leads": [
+    { "id": "lead-4001", "source": "whatsapp", "name": "Arun Prakash", "company": "Vertex Fitness", "phone": "+91-90000-40001", "email": "arun@vertexfit.sample", "message": "Need 200 dry-fit polos with our gym logo.", "status": "new", "assignedTo": null, "createdAt": "2026-09-19T05:30:00.000Z" },
+    { "id": "lead-4002", "source": "website_form", "name": "Lena Fischer", "company": "Fischer Hotels", "phone": "+49-151-4000002", "email": "lena@fischerhotels.sample", "message": "Uniform programme for 12 properties.", "status": "qualified", "assignedTo": "u-admin-1", "createdAt": "2026-09-17T09:12:00.000Z" },
+    { "id": "lead-4003", "source": "configurator", "name": "Vikram S", "company": "Nova Labs", "phone": "+91-90000-40003", "email": "vikram@novalabs.sample", "message": "Hoodies for an offsite, 80 pcs.", "status": "contacted", "assignedTo": "u-admin-1", "createdAt": "2026-09-15T13:45:00.000Z" },
+    { "id": "lead-4004", "source": "whatsapp", "name": "Grace Adeyemi", "company": "Bright Steps Academy", "phone": "+234-800-4000004", "email": "grace@brightsteps.sample", "message": "School uniform quote for 600 students.", "status": "won", "assignedTo": "u-admin-1", "createdAt": "2026-09-11T08:20:00.000Z" },
+    { "id": "lead-4005", "source": "email", "name": "Marco Bianchi", "company": "Bianchi Retail", "phone": "+39-333-4000005", "email": "marco@bianchiretail.sample", "message": "Private-label tees, 500 pcs, own labels.", "status": "lost", "assignedTo": "u-admin-2", "createdAt": "2026-08-29T15:05:00.000Z" },
+    { "id": "lead-4006", "source": "website_form", "name": "Divya Menon", "company": "Craft Bazaar", "phone": "+91-90000-40006", "email": "divya@craftbazaar.sample", "message": "Looking for organic cotton tees at scale.", "status": "new", "assignedTo": null, "createdAt": "2026-09-20T02:10:00.000Z" },
+    { "id": "lead-4007", "source": "whatsapp", "name": "Owen Blake", "company": "Blake Logistics", "phone": "+44-7700-400007", "email": "owen@blakelog.sample", "message": "Hi-vis workwear for 150 drivers.", "status": "new", "assignedTo": null, "createdAt": "2026-09-20T03:40:00.000Z" },
+    { "id": "lead-4008", "source": "configurator", "name": "Hari Krishnan", "company": "Tiruppur Textiles Assn", "phone": "+91-90000-40008", "email": "hari@ttassn.sample", "message": "Bulk polo enquiry for an event, 1000 pcs.", "status": "qualified", "assignedTo": "u-admin-2", "createdAt": "2026-09-13T11:00:00.000Z" }
+  ],
+  "samples": [
+    { "id": "smp-5001", "customerId": "c-1001", "productId": "p-polo-001", "rfqId": "rfq-2001", "status": "delivered", "courier": "BlueDart", "tracking": "BD-5001-SAMPLE", "createdAt": "2026-09-02T10:00:00.000Z" },
+    { "id": "smp-5002", "customerId": "c-1004", "productId": "p-jersey-001", "rfqId": "rfq-2004", "status": "in_production", "courier": null, "tracking": null, "createdAt": "2026-09-16T15:00:00.000Z" },
+    { "id": "smp-5003", "customerId": "c-1006", "productId": "p-tshirt-001", "rfqId": "rfq-2006", "status": "requested", "courier": null, "tracking": null, "createdAt": "2026-09-19T09:30:00.000Z" },
+    { "id": "smp-5004", "customerId": "c-1003", "productId": "p-hoodie-002", "rfqId": "rfq-2002", "status": "rejected", "courier": null, "tracking": null, "createdAt": "2026-09-10T07:00:00.000Z" }
+  ]
+}
