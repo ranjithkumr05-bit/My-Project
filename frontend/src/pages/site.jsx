@@ -145,7 +145,6 @@ export function SiteShell({ parts, children }) {
               {label}
             </a>
           ))}
-          <a className="cw-loginlink" href="#/login">Portal login</a>
         </nav>
         <a className="cw-wa-cta" href={wa} target="_blank" rel="noopener noreferrer">
           Connect On Whatsapp <span aria-hidden="true">↗</span>
@@ -170,7 +169,6 @@ export function SiteShell({ parts, children }) {
         </div>
         <nav aria-label="footer">
           {NAV.map(([to, label]) => <a key={to} href={`#/${to}`}>{label}</a>)}
-          <a href="#/login">Portal login</a>
         </nav>
         <p className="muted">© {new Date().getFullYear()} Customwear. Sample data — no live orders.</p>
       </footer>

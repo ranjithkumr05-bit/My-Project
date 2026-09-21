@@ -37,7 +37,13 @@ Conventions: JSON, errors {error,status,details}, CORS GET/POST/PATCH/DELETE, 25
 - Events: lead.created/updated, rfq.created/status_changed/quoted/converted, order.created/stage_changed, sample.requested/status_changed, auth.login.
 
 ## 5. Frontend routes (hash, no react-router)
-- `#/` SiteApp (marketing default). `#/login` Login (admin→#/admin, customer→#/app).
+> ⚠️ PORTAL DISABLED (2026-09-21): `frontend/src/App.jsx` now renders `SiteApp` for
+> every route, so `#/login`, `#/app`, `#/admin` fall back to the home page. The 2
+> "Portal login" links were removed from `site.jsx` (header + footer). Portal pages and
+> all backend routes are untouched. Restore with:
+> `git checkout <commit-before> -- frontend/src/App.jsx frontend/src/pages/site.jsx`
+- `#/` SiteApp (marketing default) — Home, about, services(+slug), process, portfolio, blog, contact
+- Disabled-but-present: `#/login` Login (admin→#/admin, customer→#/app)
 - Customer: `#/app` dash, `#/app/catalogue`, `#/app/rfq-new`, `#/app/rfqs`, `#/app/orders`, `#/app/samples`.
 - Admin: `#/admin` dash, `#/admin/leads`, `#/admin/rfqs`, `#/admin/orders`, `#/admin/samples`.
 - Token sessionStorage `cw_token`. Logged-out deep link → Login with next preserved.
