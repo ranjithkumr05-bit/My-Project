@@ -39,7 +39,7 @@ export function NewRfq() {
     setError(null)
     try {
       await Rfqs.create({ note, lines })
-      navigate('#/app/rfqs')
+      navigate('/app/rfqs')
     } catch (err) {
       setError(err.details?.join?.(', ') || err.message)
     } finally {

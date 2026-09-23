@@ -51,3 +51,11 @@ export function ErrorBox({ error, onRetry }) {
     </div>
   )
 }
+
+// Portal helper: accepts legacy hash targets ('#/app/rfqs') and clean
+// React-Router paths ('/app/rfqs'). Full-page assign keeps Auth.me()
+// session restore as the single source of truth — no router context needed.
+export function navigate(to) {
+  const clean = String(to || '#/').replace(/^#/, '') || '/'
+  window.location.assign(clean.startsWith('/') ? clean : `/${clean}`)
+}

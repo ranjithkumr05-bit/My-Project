@@ -15,7 +15,9 @@ export function Login({ onLoggedIn, next }) {
     try {
       const user = await Auth.login(email.trim(), password)
       onLoggedIn(user)
-      navigate(next ? `#/${next}` : user.role === 'admin' ? '#/admin' : '#/app')
+      // Ponytail: clean paths — ui.navigate() strips any legacy '#/' prefix,
+      // so both styles land on the same BrowserRouter route.
+      navigate(user.role === 'admin' ? '/admin' : (next ? `/${next}` : '/app'))
     } catch (err) {
       setError(err.message || 'Login failed')
     } finally {

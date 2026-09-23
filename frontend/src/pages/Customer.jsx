@@ -5,8 +5,9 @@ import { RfqList, OrderList, SampleList } from './lists.jsx'
 import { NewRfq } from './NewRfq.jsx'
 import { RfqTable, OrderTable } from './tables.jsx'
 
-export function CustomerApp({ parts, user }) {
-  const page = parts[0] || 'dashboard'
+// Ponytail: path-segment routing instead of hash parts — BrowserRouter gives
+// CustomerApp the sub-page directly (no parts parsing, no hash listener).
+export function CustomerApp({ page = 'dashboard', user }) {
   if (page === 'catalogue') return <CataloguePage />
   if (page === 'rfq-new') return <NewRfq />
   if (page === 'rfqs') return <RfqList />

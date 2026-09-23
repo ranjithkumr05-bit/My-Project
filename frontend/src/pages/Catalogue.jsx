@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Catalogue } from '../api.js'
 import { useAsync, Loading, ErrorBox, Badge, navigate } from '../ui.jsx'
 
@@ -33,7 +34,7 @@ export function CataloguePage() {
             <div className="row">
               {p.colors.slice(0, 4).map((c) => <span className="badge" key={c}>{c}</span>)}
             </div>
-            <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => navigate('#/app/rfq-new')}>
+            <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => navigate('/app/rfq-new')}>
               Request quotation
             </button>
           </div>

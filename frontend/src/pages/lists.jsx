@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Rfqs, Orders, Samples, Catalogue } from '../api.js'
-import { useAsync, Loading, ErrorBox } from '../ui.jsx'
+import { useAsync, Loading, ErrorBox, Badge } from '../ui.jsx'
 import { RfqTable, OrderTable } from './tables.jsx'
 
 const asRows = (d, key) => (Array.isArray(d) ? d : d?.[key] || [])
@@ -11,7 +11,7 @@ export function RfqList() {
   if (rfqs.error) return <ErrorBox error={rfqs.error} onRetry={rfqs.retry} />
   return (
     <>
-      <div className="spread"><h1>My RFQs</h1><a className="btn btn-primary" href="#/app/rfq-new">New RFQ</a></div>
+      <div className="spread"><h1>My RFQs</h1><a className="btn btn-primary" href="/app/rfq-new">New RFQ</a></div>
       <RfqTable rows={asRows(rfqs.data, 'rfqs')} />
     </>
   )

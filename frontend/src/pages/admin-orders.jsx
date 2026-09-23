@@ -11,10 +11,16 @@ export function AdminOrders() {
   if (orders.loading || ref.loading) return <Loading />
   if (orders.error) return <ErrorBox error={orders.error} onRetry={orders.retry} />
   const rows = asRows(orders.data, 'orders')
-  const stages = ref.data?.productionStages || []
+  const stages = (ref.data?.productionStages || []).map((s) => (typeof s === 'object' ? s.id : s))
   const statuses = ref.data?.orderStatuses || []
 
-  async function advance(o, value) {
+  async function setStage(o, stage) {
+    setBusyId(o.id)
+    try { await Orders.setStage(o.id, stage); orders.retry() } catch (e) { alert(e.message) }
+    finally { setBusyId(null) }
+  }
+
+  async function setStatus(o, value) {
     setBusyId(o.id)
     try { await Orders.setStatus(o.id, value); orders.retry() } catch (e) { alert(e.message) }
     finally { setBusyId(null) }
@@ -31,13 +37,16 @@ export function AdminOrders() {
               <div className="muted">customer {o.customerId} · value {o.totalValue != null ? `₹${o.totalValue}` : '—'}</div>
             </div>
             <div className="row">
-              {stages.map((s) => (
-                <button key={s} className="btn" disabled={busyId === o.id || s === o.productionStage} onClick={() => advance(o, s)}>
-                  → {String(s).replace(/-/g, ' ')}
-                </button>
-              ))}
+              {stages.map((s) => {
+                const current = typeof o.stage === 'object' ? o.stage?.id : (o.stage || o.productionStage)
+                return (
+                  <button key={s} className="btn" disabled={busyId === o.id || s === current} onClick={() => setStage(o, s)}>
+                    → {String(s).replace(/-/g, ' ')}
+                  </button>
+                )
+              })}
               {statuses.filter((s) => s !== o.status && !/production/i.test(s)).slice(0, 2).map((s) => (
-                <button key={s} className="btn" disabled={busyId === o.id} onClick={() => advance(o, s)}>
+                <button key={s} className="btn" disabled={busyId === o.id} onClick={() => setStatus(o, s)}>
                   → {String(s).replace(/-/g, ' ')}
                 </button>
               ))}
@@ -45,7 +54,7 @@ export function AdminOrders() {
           </div>
           {stages.length > 0 && (
             <div style={{ marginTop: 10 }}>
-              <StageTimeline stages={stages} current={o.productionStage} />
+              <StageTimeline stages={stages} current={typeof o.stage === 'object' ? o.stage?.id : (o.stage || o.productionStage)} />
             </div>
           )}
         </div>

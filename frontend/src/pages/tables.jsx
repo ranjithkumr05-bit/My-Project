@@ -11,7 +11,7 @@ export function RfqTable({ rows }) {
             <tr key={r.id}>
               <td>{r.id}</td>
               <td className="muted">{(r.createdAt || '').slice(0, 10)}</td>
-              <td>{(r.lines || []).length}</td>
+              <td>{(r.items || r.lines || []).length}</td>
               <td><Badge value={r.status} /></td>
             </tr>
           ))}
@@ -33,9 +33,14 @@ export function OrderTable({ rows }) {
               <td>{o.id}</td>
               <td>
                 <Badge value={o.status} />
-                {o.productionStage && o.allStages?.length > 0 && (
-                  <div style={{ marginTop: 6 }}><StageTimeline stages={o.allStages} current={o.productionStage} /></div>
-                )}
+                {(o.stage && o.stages?.length > 0) || (o.productionStage && o.allStages?.length > 0) ? (
+                  <div style={{ marginTop: 6 }}>
+                    <StageTimeline
+                      stages={o.stages ? o.stages.map((s) => s.id || s) : o.allStages}
+                      current={o.stage ? (typeof o.stage === 'object' ? o.stage.id : o.stage) : o.productionStage}
+                    />
+                  </div>
+                ) : null}
               </td>
               <td>{o.totalValue != null ? `₹${o.totalValue}` : '—'}</td>
             </tr>

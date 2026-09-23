@@ -37,11 +37,11 @@ export function AdminRfqs() {
               ))}
             </div>
           </div>
-          {(r.lines || []).length > 0 && (
+          {(r.items || r.lines || []).length > 0 && (
             <table style={{ marginTop: 10 }}>
               <thead><tr><th>Product</th><th>Qty</th><th>Colour</th><th>Branding</th></tr></thead>
               <tbody>
-                {r.lines.map((ln, i) => (
+                {(r.items || r.lines).map((ln, i) => (
                   <tr key={i}>
                     <td>{ln.productId || ln.name}</td>
                     <td>{ln.qty}</td>

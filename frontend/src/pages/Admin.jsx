@@ -1,5 +1,5 @@
 import { Dashboard } from '../api.js'
-import { Loading, ErrorBox } from '../ui.jsx'
+import { useAsync, Loading, ErrorBox } from '../ui.jsx'
 import { AdminRfqs } from './admin-rfqs.jsx'
 import { AdminOrders } from './admin-orders.jsx'
 import { AdminSamples } from './admin-samples.jsx'
@@ -9,8 +9,9 @@ export { LeadsPage, AdminRfqs, AdminOrders, AdminSamples }
 
 const asRows = (d, key) => (Array.isArray(d) ? d : d?.[key] || [])
 
-export function AdminApp({ parts }) {
-  const page = parts[0] || 'dashboard'
+// Ponytail: path-segment routing instead of hash parts — BrowserRouter gives
+// AdminApp the sub-page directly (no parts parsing, no hash listener).
+export function AdminApp({ page = 'dashboard' }) {
   if (page === 'leads') return <LeadsPage />
   if (page === 'rfqs') return <AdminRfqs />
   if (page === 'orders') return <AdminOrders />

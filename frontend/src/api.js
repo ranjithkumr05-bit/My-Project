@@ -76,6 +76,7 @@ export const Rfqs = {
 export const Orders = {
   list: () => api.get('/api/orders'),
   get: (id) => api.get(`/api/orders/${id}`),
+  setStage: (id, stage, note) => api.patch(`/api/orders/${id}/stage`, note ? { stage, note } : { stage }),
   setStatus: (id, status) => api.patch(`/api/orders/${id}/status`, { status }),
 }
 

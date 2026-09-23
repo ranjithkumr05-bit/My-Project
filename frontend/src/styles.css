@@ -102,7 +102,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
 .login-wrap .card { padding: 28px; }
 
 /* ---- services cards ---- */
-.cw-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 .cw-card { background: #17284a; border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius);
   padding: 20px; position: relative; cursor: pointer; transition: border-color .2s, transform .2s, box-shadow .2s;
   box-shadow: 0 4px 20px rgba(0,0,0,.35); }
@@ -248,7 +247,13 @@ a.cw-post:hover { border-color: var(--gold-500); transform: translateY(-2px); }
 .cw-grid2 p { color: #b9c4d6; margin: 4px 0 14px; }
 
 .cw-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px; }
-.cw-card { background: #17284a; border: 1px solid rgba(255, 255, 255, .06); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.35); }
+/* Ponytail: single shared card surface — this one .cw-card rule covers Home/
+   Services tiles, portfolio tiles and subcategory cards; add variants with new
+   classes instead of re-defining .cw-card (avoids a second cascade override). */
+.cw-card { background: #17284a; border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius);
+  padding: 20px; position: relative; cursor: pointer; overflow: hidden;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 20px rgba(0,0,0,.35); }
 .cw-card img { width: 100%; height: 160px; object-fit: cover; }
 .cw-card h3 { padding: 12px 14px 0; }
 .cw-card p { padding: 4px 14px 14px; color: #b9c4d6; font-size: 14px; }
