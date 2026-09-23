@@ -4,7 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from '
 import PageShell from './components/PageShell.jsx'
 import { resolveCanonicalSlug } from './data/services.js'
 import About from './pages/About.jsx'
-import Blog from './pages/Blog.jsx'
+import Blog, { BlogPost } from './pages/Blog.jsx'
 import Contact from './pages/Contact.jsx'
 import Home from './pages/Home.jsx'
 import Portfolio from './pages/Portfolio.jsx'
@@ -39,6 +39,7 @@ export default function Router() {
           <Route path="/process" element={<Process />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<Home />} />
         </Routes>

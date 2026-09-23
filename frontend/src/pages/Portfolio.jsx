@@ -1,11 +1,31 @@
-// pages/Portfolio.jsx - showcase placeholder (pics + contents to be set separately).
+// pages/Portfolio.jsx - showcase. Category gallery + filters (.cw-workcard/.cw-filter)
+// remain reserved for separately-supplied client content (see portfolio.spec.mjs);
+// this page ships an honest sample-imagery strip instead of a client gallery.
 import { Link } from 'react-router-dom'
+
+// Same proven sample imagery as the Home strip (files verified present; not labelled
+// as client projects).
+const SAMPLES = ['p-office-corporate', 'p-sportswear', 'p-school-college-tshirts', 'p-hoodies']
 
 export default function Portfolio() {
   return (
     <section className="cw-section cw-page">
       <p className="cw-kicker-pill"><span className="dot" aria-hidden="true" /> OUR PORTFOLIO</p>
       <h1>Real Apparel. Made with Care.</h1>
+      <p className="cw-lead">Sample imagery from our categories — representative of what we make, not labelled as client projects.</p>
+      <h2>A look at our apparel</h2>
+      <div className="cw-home-work">
+        {SAMPLES.map((img) => (
+          <img
+            key={img}
+            src={`/showcase/${img}.jpg`}
+            alt={`${img.replace(/^p-/, '').replace(/-/g, ' ')} sample`}
+            loading="lazy"
+            width="904"
+            height="600"
+          />
+        ))}
+      </div>
       <div className="cw-cta-band" style={{ marginTop: '28px' }}>
         <h2>Have an Apparel Project in Mind?</h2>
         <p className="cw-lead">Share your requirements - we quote it, sample it, then produce it.</p>

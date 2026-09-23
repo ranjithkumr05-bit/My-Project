@@ -23,7 +23,7 @@ export default function Process() {
             </span>
             <img src={`/showcase/${img}.jpg`} alt={title} loading="lazy" className="cw-step-img" />
             <div className="cw-step-body">
-              <h3 className="cw-step-title">{title}</h3>
+              <h2 className="cw-step-title">{title}</h2>
               <p className="cw-step-desc">{desc}</p>
             </div>
           </div>

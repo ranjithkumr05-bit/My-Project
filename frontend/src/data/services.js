@@ -4,7 +4,8 @@
 // import.meta.env only exists under Vite; guard so Node-based tools (Playwright specs,
 // check scripts) can import this module without crashing. Same value in the browser.
 const ENV = (typeof import.meta !== 'undefined' && import.meta.env) || {}
-export const WA_NUMBER = ENV.VITE_WHATSAPP_NUMBER || '919999999999'
+export const WA_NUMBER = ENV.VITE_WHATSAPP_NUMBER || '917598399464'
+export const CONTACT_EMAIL = 'customapperales@gmail.com'
 export const WA_DEFAULT_MSG = 'Hi Customwear — I need a quotation for custom apparel.'
 export const waLink = (text) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text || WA_DEFAULT_MSG)}`
 
@@ -46,25 +47,28 @@ export const SLUG_ALIASES = {
 
 export const IMG_DIMS = {
   // Real pixel dimensions read from each file on disk (see frontend/audit-dims.mjs).
+  'corporate-office': [1200, 670],
   'gpt/polos': [1536, 1024],
   'gpt/hoodies': [1536, 1024],
   'gpt/private-label': [1254, 1254],
-  'gpt/group-event': [1024, 1024],
-  'sportswear': [800, 992],
+  'sportswear': [1200, 670],
   'p-sportswear': [904, 600],
+  'school-college': [1200, 670],
   'school-college-tshirts': [800, 1000],
   'p-school-college-tshirts': [1400, 933],
-  'workwear': [800, 1000],
+  'workwear': [1200, 670],
   'p-workwear': [1024, 683],
-  'retail-staff': [800, 1000],
+      'retail-store': [1200, 670],
   'p-retail-staff': [1400, 933],
   'hoodies': [800, 992],
+  'hoodies-sweatshirts': [1200, 670],
   'p-hoodies': [1400, 933],
   'baniyan': [800, 1000],
   'p-baniyan': [1400, 933],
   'office-corporate': [800, 1000],
   'p-office-corporate': [904, 600],
-  'private-label': [800, 1000],
+  'group-event': [1200, 670],
+  'private-label': [1200, 670],
   'p-private-label': [1400, 933],
   'mfg-printing': [672, 504],
   'mfg-sourcing': [889, 667],
@@ -72,17 +76,16 @@ export const IMG_DIMS = {
 
 // Image keys with no asset on disk yet. Components render an honest neutral
 // placeholder for these instead of substituting an unrelated garment photo.
-// gpt/group-event: a genuine group/event photo is still to be supplied.
-export const MISSING_IMAGES = ['gpt/group-event']
+// None currently — all eight category photos ship with the site.
+export const MISSING_IMAGES = []
 
 // Single source of truth for real on-disk file extensions.
-// Anything not listed here is a genuine .jpg. Note: sportswear/hoodies were
-// shipped as WebP bytes under a .jpg name; correctly-named .webp copies exist.
+// Anything not listed here is a genuine .jpg. Note: hoodies.jpg ships as
+// WebP bytes under a .jpg name; a correctly-named .webp copy exists.
 export const IMG_EXT = {
   'gpt/polos': 'png',
   'gpt/hoodies': 'png',
   'gpt/private-label': 'png',
-  'sportswear': 'webp',
   'hoodies': 'webp',
 }
 
@@ -94,7 +97,7 @@ export const SERVICES = [
     slug: 'corporate-office-apparel',
     name: 'Corporate & Office Apparel',
     short: 'Corporate & Office Apparel',
-    image: 'gpt/polos',
+    image: 'corporate-office',
     alt: 'Corporate polo shirts and office apparel',
     description: 'Professional apparel for offices, corporates, and branded staff programmes.',
     heroHeadline: 'Corporate & Office Apparel',
@@ -112,13 +115,13 @@ export const SERVICES = [
       { name: 'Custom-Branded Office Apparel', blurb: 'Bespoke branded office apparel from design to delivery.' },
         ],
     // swappable:true — all category + gallery images may be replaced with factory photos later.
-        galleryImages: ['office-corporate', 'p-office-corporate'],
+        galleryImages: ['office-corporate', 'p-office-corporate', 'gpt/polos'],
   },
   {
     slug: 'hoodies-sweatshirts',
     name: 'Hoodies & Sweatshirts',
     short: 'Hoodies & Sweatshirts',
-    image: 'gpt/hoodies',
+    image: 'hoodies-sweatshirts',
     alt: 'Custom hoodies and sweatshirts',
     description: 'Heavyweight fleece hoodies and sweatshirts with retail finish.',
     heroHeadline: 'Hoodies & Sweatshirts',
@@ -136,7 +139,7 @@ export const SERVICES = [
       { name: 'Custom Sweatshirts', blurb: 'Crewneck sweatshirts with your branding or prints.' },
     ],
     // swappable:true — all category + gallery images may be replaced with factory photos later.
-    galleryImages: ['hoodies', 'p-hoodies'],
+    galleryImages: ['hoodies', 'p-hoodies', 'gpt/hoodies'],
   },
   {
     slug: 'sportswear-team-jerseys',
@@ -166,7 +169,7 @@ export const SERVICES = [
     slug: 'school-college-tshirts',
     name: 'School & College T-Shirts',
     short: 'School & College T-Shirts',
-    image: 'school-college-tshirts',
+    image: 'school-college',
     alt: 'School and college T-shirts in graded sizes',
     description: 'Durable, comfortable T-shirts for schools, colleges and campuses.',
     heroHeadline: 'School & College T-Shirts',
@@ -184,7 +187,7 @@ export const SERVICES = [
       { name: 'Custom School & College T-Shirts', blurb: 'Bespoke college and school T-shirts from design to delivery.' },
     ],
     // swappable:true — all category + gallery images may be replaced with factory photos later.
-    galleryImages: ['school-college-tshirts', 'p-school-college-tshirts'],
+    galleryImages: ['school-college', 'p-school-college-tshirts'],
   },
   {
     slug: 'workwear-staff-apparel',
@@ -209,13 +212,12 @@ export const SERVICES = [
     ],
     // swappable:true — all category + gallery images may be replaced with factory photos later.
     galleryImages: ['workwear', 'p-workwear'],
-    imageNote: 'Placeholder — practical staff T-shirt photo should replace at first photo shoot.',
   },
     {
     slug: 'retail-store-apparel',
     name: 'Retail & Store Apparel',
     short: 'Retail & Store Apparel',
-    image: 'retail-staff',
+        image: 'retail-store',
     alt: 'Retail staff T-shirts and store apparel',
     description: 'Branded store, supermarket and showroom staff apparel with your logo.',
     heroHeadline: 'Retail & Store Apparel',
@@ -233,13 +235,13 @@ export const SERVICES = [
       { name: 'Custom-Branded Store T-Shirts', blurb: 'Bespoke branded store tees from design to delivery.' },
     ],
     // swappable:true — all category + gallery images may be replaced with factory photos later.
-    galleryImages: ['retail-staff', 'p-retail-staff'],
+        galleryImages: ['retail-store', 'p-retail-staff'],
   },
     {
     slug: 'group-event-tshirts',
     name: 'Group & Event T-Shirts',
     short: 'Group & Event T-Shirts',
-    image: 'gpt/group-event',
+    image: 'group-event',
     alt: 'Group of friends wearing coordinated custom event T-shirts',
     description: 'Custom group and event T-shirts for reunions, trips, celebrations and team orders.',
     heroHeadline: 'Group & Event T-Shirts',
@@ -257,14 +259,13 @@ export const SERVICES = [
       { name: 'Custom T-Shirts for Special Events', blurb: 'Bulk custom tees for weddings, campaigns and special events.' },
     ],
     // swappable:true — all category + gallery images may be replaced with factory photos later.
-    galleryImages: ['gpt/group-event'],
-    imageNote: 'Placeholder — a genuine group/event photo should replace this at first photo shoot.',
+    galleryImages: ['group-event'],
   },
     {
     slug: 'private-label',
     name: 'Private Label & Custom Manufacturing',
     short: 'Private Label & Custom Manufacturing',
-    image: 'gpt/private-label',
+    image: 'private-label',
     alt: 'Private label clothing manufacturing process',
     description: 'Your brand, your labels, your packing — produced on our manufacturing floor.',
     heroHeadline: 'Private Label & Custom Manufacturing',
@@ -282,7 +283,7 @@ export const SERVICES = [
       { name: 'Bulk Custom Apparel Manufacturing', blurb: 'Full-bulk private-label apparel runs with packing integration.' },
     ],
     // swappable:true — all category + gallery images may be replaced with factory photos later.
-    galleryImages: ['private-label', 'p-private-label'],
+    galleryImages: ['private-label', 'p-private-label', 'gpt/polos', 'gpt/hoodies', 'baniyan'],
   },
 ]
 

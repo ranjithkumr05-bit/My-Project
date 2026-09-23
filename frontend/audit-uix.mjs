@@ -171,7 +171,7 @@ for (const [w, h] of VIEWPORTS) {
 // --- CTA flows ---
 {
   await fresh('/', 1440, 900)
-  const headerQuote = page.locator('.cw-quote-cta')
+  const headerQuote = page.locator('.cw-nav a', { hasText: 'Get a Quote' })
   if (!(await headerQuote.count())) add('high', '/', '1440x900', 'missing-cta', 'header Get a Quote absent')
   else {
     await headerQuote.click(); await page.waitForTimeout(200)

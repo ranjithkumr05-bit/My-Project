@@ -60,6 +60,9 @@ export default function ServiceDetail() {
         <Link className="btn" to={`/contact?type=sample&service=${svc.slug}`}>Request a Sample</Link>
         <a className="btn" href={wa} target="_blank" rel="noopener noreferrer">WhatsApp Us</a>
       </div>
+      <p style={{ textAlign: 'center', marginTop: '16px' }}>
+        <Link className="btn" to="/services">← Back to Services</Link>
+      </p>
     </section>
   )
 }

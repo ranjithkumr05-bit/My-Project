@@ -2,7 +2,7 @@
 // Driven by React Router location; single copy, no hash links.
 import { useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { WA_DEFAULT_MSG, SERVICES, waLink } from '../data/services.js'
+import { CONTACT_EMAIL, WA_DEFAULT_MSG, SERVICES, waLink } from '../data/services.js'
 
 const NAV = [
   ['/', 'Home', true],
@@ -11,7 +11,7 @@ const NAV = [
   ['/process', 'Process'],
   ['/portfolio', 'Portfolio'],
   ['/blog', 'Blog'],
-  ['/contact', 'Contact'],
+  ['/contact?type=quote', 'Get a Quote'],
 ]
 
 export default function PageShell({ children }) {
@@ -19,7 +19,11 @@ export default function PageShell({ children }) {
   const { pathname } = useLocation()
   const onHero = pathname === '/'
   const wa = waLink(WA_DEFAULT_MSG)
-  const active = (to, exact) => (exact ? pathname === '/' : pathname === to || pathname.startsWith(`${to}/`))
+  // Strip ?query so /contact?type=quote still highlights the /contact nav item.
+  const active = (to, exact) => {
+    const path = to.split('?')[0]
+    return exact ? pathname === '/' : pathname === path || pathname.startsWith(`${path}/`)
+  }
   return (
     <div className="cw-site">
       <a className="cw-skip" href="#main">Skip to content</a>
@@ -38,7 +42,6 @@ export default function PageShell({ children }) {
         <a className="cw-wa-cta" href={wa} target="_blank" rel="noopener noreferrer">
           Connect On Whatsapp <span aria-hidden="true">↗</span>
         </a>
-        <Link className="cw-quote-cta" to="/contact?type=quote">Get a Quote</Link>
       </header>
 
       <div className="cw-float">
@@ -62,7 +65,7 @@ export default function PageShell({ children }) {
         <nav aria-label="footer services">
           {SERVICES.map((s) => <Link key={s.slug} to={`/services/${s.slug}`}>{s.name}</Link>)}
         </nav>
-        <p className="muted">Tiruppur, Tamil Nadu — custom apparel &amp; private-label manufacturing.<br />© {new Date().getFullYear()} Customwear.</p>
+        <p className="muted">Tiruppur, Tamil Nadu — custom apparel &amp; private-label manufacturing.<br /><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a><br />© {new Date().getFullYear()} Customwear.</p>
       </footer>
     </div>
   )

@@ -72,7 +72,7 @@ test('each service page shows exactly 8 subcategories and a quote link to /conta
 
 test('primary nav covers all 7 pages and each navigates', async ({ page }) => {
   await load(page, '/')
-  const navLinks = ['Home', 'About', 'Services', 'Process', 'Portfolio', 'Blog', 'Contact']
+  const navLinks = ['Home', 'About', 'Services', 'Process', 'Portfolio', 'Blog', 'Get a Quote']
   for (const label of navLinks) {
     await expect(page.locator('.cw-nav').getByRole('link', { name: label })).toBeVisible()
   }

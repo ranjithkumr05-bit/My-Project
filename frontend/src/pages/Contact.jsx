@@ -2,7 +2,7 @@
 // Deep links preselect enquiry state: /contact?type=quote|sample|general&service=<slug>.
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { SERVICES, WA_DEFAULT_MSG, serviceBySlug, waLink } from '../data/services.js'
+import { CONTACT_EMAIL, SERVICES, WA_DEFAULT_MSG, serviceBySlug, waLink } from '../data/services.js'
 
 const TYPES = [
   ['quote', 'Get a Quote'],
@@ -59,7 +59,7 @@ export default function Contact() {
       <div className="cw-grid2">
         {state.done ? (
           <div className="cw-card cw-thanks">
-            <h3>Enquiry received ✔</h3>
+            <h2>Enquiry received ✔</h2>
             <p>Our team will reach out. Reference your name in any follow-up.</p>
             <Link className="btn" to="/portfolio">Browse the portfolio meanwhile</Link>
           </div>
@@ -90,9 +90,11 @@ export default function Contact() {
           </form>
         )}
         <aside>
-          <h3>Prefer WhatsApp?</h3>
+          <h2>Prefer WhatsApp?</h2>
           <p><a className="btn" href={waLink(WA_DEFAULT_MSG)} target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a></p>
-          <h3>What happens next</h3>
+          <h2>Prefer email?</h2>
+          <p><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+          <h2>What happens next</h2>
           <p className="muted">We confirm fabric, sizes and branding, share a quotation, then cut a sample for approval before bulk.</p>
         </aside>
       </div>

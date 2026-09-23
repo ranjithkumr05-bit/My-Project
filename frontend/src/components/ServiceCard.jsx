@@ -30,7 +30,6 @@ export default function ServiceCard({ svc }) {
       <p>{svc.description}</p>
       <div className="cw-card-ctas">
         <Link className="btn btn-gold" to={`/services/${svc.slug}`}>Explore {svc.short} ↗</Link>
-        <Link className="cw-card-quote" to={`/contact?type=quote&service=${svc.slug}`}>Get a Quote →</Link>
       </div>
     </article>
   )

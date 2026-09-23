@@ -3,6 +3,7 @@
   --navy-900: #0a1628;
   --navy-800: #10233d;
   --navy-700: #16304f;
+  --surface: #16233d;
   --gold-500: #d4af37;
   --gold-300: #e6cf7f;
   --ink-100: #f5f5f0;
@@ -73,8 +74,9 @@ body {
 .badge.bad { background: rgba(217,106,91,.15); color: var(--bad); }
 .badge.gold { background: rgba(212,175,55,.15); color: var(--gold-300); }
 
+h1, h2, h3 { color: #ffffff; }
 h1 { font-size: 26px; margin: 0 0 6px; }
-h2 { font-size: 18px; margin: 26px 0 12px; color: var(--ink-100); }
+h2 { font-size: 18px; margin: 26px 0 12px; }
 .muted { color: var(--ink-500); font-size: 13px; }
 .kpi { font-size: 30px; font-weight: 700; color: var(--gold-300); line-height: 1.1; }
 
@@ -101,8 +103,9 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
 
 /* ---- services cards ---- */
 .cw-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-.cw-card { background: var(--navy-800); border: 1px solid var(--navy-700); border-radius: var(--radius);
-  padding: 20px; position: relative; cursor: pointer; transition: border-color .2s, transform .2s; }
+.cw-card { background: #17284a; border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius);
+  padding: 20px; position: relative; cursor: pointer; transition: border-color .2s, transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 20px rgba(0,0,0,.35); }
 .cw-card:hover { border-color: var(--gold-500); transform: translateY(-2px); }
 .cw-card img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; }
 .cw-card h3 { margin: 0 0 8px; font-size: 16px; }
@@ -150,9 +153,17 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
 }
 
 /* ---- blog ---- */
-.cw-posts { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-.cw-post { background: var(--navy-800); border: 1px solid var(--navy-700); border-radius: var(--radius); padding: 18px; }
+/* Single source of truth for post grids. Previously defined 3×; the copy at the
+   bottom of the file sat after every media query and pinned the grid to 3
+   fixed columns down to 360px, squeezing cards and causing horizontal overflow. */
+.cw-posts { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 14px; }
+.cw-post { background: var(--navy-800); border: 1px solid var(--navy-700); border-radius: 12px; padding: 18px; min-width: 0; }
+.cw-post h3 { margin: 10px 0 8px; }
+.cw-posts .cw-post h2 { margin: 6px 0 4px; font-size: 18px; color: var(--ink-100); }
+.cw-post p { margin: 0; color: var(--ink-300); font-size: 13px; line-height: 1.6; }
 .cw-post .badge { margin-bottom: 10px; }
+a.cw-post { display: block; color: inherit; text-decoration: none; transition: border-color .2s ease, transform .2s ease; }
+a.cw-post:hover { border-color: var(--gold-500); transform: translateY(-2px); }
 
 /* ---- keyframes ---- */
 @keyframes cw-fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -213,6 +224,8 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
 .cw-section { padding: clamp(28px, 5vw, 64px) clamp(16px, 4vw, 48px); }
 .cw-page h1 { font-size: clamp(26px, 3.4vw, 40px); margin-bottom: 6px; }
 .cw-section h2 { font-size: clamp(20px, 2.6vw, 30px); margin-bottom: 16px; }
+.cw-section aside h2 { margin: 14px 0 6px; font-size: 18px; }
+.cw-section .cw-card h2 { margin: 0 0 8px; font-size: 16px; }
 .cw-section h3 { margin: 6px 0 4px; }
 
 .cw-cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
@@ -235,15 +248,11 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
 .cw-grid2 p { color: #b9c4d6; margin: 4px 0 14px; }
 
 .cw-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px; }
-.cw-card { background: var(--card, #101f38); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; overflow: hidden; }
+.cw-card { background: #17284a; border: 1px solid rgba(255, 255, 255, .06); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.35); }
 .cw-card img { width: 100%; height: 160px; object-fit: cover; }
 .cw-card h3 { padding: 12px 14px 0; }
 .cw-card p { padding: 4px 14px 14px; color: #b9c4d6; font-size: 14px; }
 .cw-thanks { padding: 20px; }
-
-.cw-posts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 14px; }
-.cw-post { background: var(--card, #101f38); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 16px; }
-.cw-post p { color: #b9c4d6; font-size: 14px; margin-top: 6px; }
 
 .cw-form { display: flex; flex-direction: column; gap: 10px; }
 .cw-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: #cdd6e4; }
@@ -286,16 +295,16 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
 .cw-header { transition: background .3s ease; }
 
 .cw-nav a { background: transparent; border-radius: 6px; padding: 4px 8px; }
-.cw-nav a.active { background: var(--gold-500); color: #0a1628; }
+.cw-nav a.active { background: var(--navy-700); color: var(--gold-300); }
 .cw-nav a:hover:not(.active) { background: rgba(212,175,55,.15); color: var(--gold-500); }
 
 .cw-wa-cta {
   display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
-  background: var(--gold-500); color: #0a1628 !important; font-weight: 700; font-size: 14px;
+  background: #25d366; color: #ffffff !important; font-weight: 700; font-size: 14px;
   padding: 10px 18px; border-radius: 8px; text-decoration: none;
   transition: transform .15s ease, box-shadow .15s ease;
 }
-.cw-wa-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(212,175,55,.35); }
+.cw-wa-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(37,211,102,.35); }
 
 .cw-hero-fs {
   position: relative; min-height: calc(100vh - 62px);
@@ -406,13 +415,13 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
 .cw-step-badge { display: inline-block; padding: 4px 10px; background: var(--navy-700); color: var(--gold-300); border-radius: 999px; font-size: 12px; font-weight: 600; margin: 14px 14px 0; }
 .cw-grid2 img.cw-step-img { height: 160px; object-fit: cover; display: block; }
 .cw-step-body { padding: 12px 14px 16px; }
-.cw-step-title { margin: 0 0 6px; font-size: 16px; }
+.cw-step-card .cw-step-title { margin: 0 0 6px; font-size: 16px; }
 .cw-step-desc { margin: 0; color: var(--ink-300); font-size: 13px; line-height: 1.5; }
 
 .cw-photo-card { margin-top: 28px; background: var(--navy-800); border: 1px solid var(--navy-700); border-radius: 12px; overflow: hidden; }
 .cw-photo-card img { width: 100%; height: 200px; object-fit: cover; display: block; }
 .cw-photo-card-body { padding: 16px 20px; border-top: 1px solid var(--navy-700); }
-.cw-photo-card-title { margin: 0 0 8px; font-size: 16px; }
+.cw-photo-card .cw-photo-card-title { margin: 0 0 8px; font-size: 16px; }
 .cw-photo-card-text { margin: 0; color: var(--ink-300); font-size: 13px; line-height: 1.5; }
 
 .cw-hint { margin: 0; color: var(--ink-500); font-size: 12px; }
@@ -447,14 +456,16 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
 .cw-steps-imgs img { width: 100%; height: 150px; object-fit: cover; border-radius: 12px; }
 .cw-home-work { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 .cw-home-work img { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; }
-.cw-brandband { background: var(--navy-800); border-top: 1px solid var(--navy-700); border-bottom: 1px solid var(--navy-700); }
+.cw-why { background: var(--surface); }
+.cw-brandband {
+  background-color: var(--surface);
+  background-image: linear-gradient(rgba(22,35,61,.92), rgba(22,35,61,.92)), url('/showcase/homepage-sketches.jpg');
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  border-top: 1px solid var(--navy-700); border-bottom: 1px solid var(--navy-700);
+}
 .cw-sample-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; background: var(--navy-800); border: 1px solid var(--navy-700); border-radius: 16px; padding: clamp(20px, 3vw, 32px); }
 .cw-sample-inner h2 { margin: 0 0 8px; font-size: clamp(22px, 2.6vw, 30px); }
 .cw-sample-inner p { margin: 0; color: var(--ink-300); max-width: 62ch; }
-.cw-posts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.cw-post { background: var(--navy-800); border: 1px solid var(--navy-700); border-radius: 12px; padding: 18px; min-width: 0; }
-.cw-post h3 { margin: 10px 0 8px; }
-.cw-post p { margin: 0; color: var(--ink-300); font-size: 13px; line-height: 1.6; }
 .cw-card-ctas { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 .cw-card-quote { color: var(--gold-300); font-size: 13px; font-weight: 600; text-decoration: none; }
 .cw-card-quote:hover { text-decoration: underline; }
@@ -465,7 +476,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold-500); 
 @media (max-width: 900px) {
   .cw-steps-imgs { grid-template-columns: 1fr; }
   .cw-steps-imgs img { height: 180px; }
-  .cw-quote-cta { display: none; }
 }
 /* respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ServiceCard from '../components/ServiceCard.jsx'
-import { POSTS } from './Blog.jsx'
+import { POSTS, postSlug } from './Blog.jsx'
 import { PROCESS_STEPS } from './Process.jsx'
 import { REQUIRED_SLUGS, serviceBySlug } from '../data/services.js'
 
@@ -46,7 +46,7 @@ export default function Home() {
   return (
     <>
       <section className="cw-hero-fs">
-        <video ref={videoRef} className="cw-hero-video" autoPlay muted loop playsInline preload="auto" src="/showcase/hero-loop.mp4" aria-hidden="true" />
+        <video ref={videoRef} className="cw-hero-video" autoPlay muted loop playsInline preload="none" poster="/showcase/homepage-workfloor.jpg" src="/showcase/hero-loop.mp4" aria-hidden="true" />
         <div className="cw-hero-overlay" />
         <div className="cw-hero-inner">
           <div className="cw-hero-left">
@@ -111,7 +111,7 @@ export default function Home() {
         <div className="cw-sec-head">
           <div>
             <p className="cw-kicker">What we make</p>
-            <h2>Eight categories, one manufacturing floor</h2>
+            <h2>Every category is made on one manufacturing floor</h2>
           </div>
           <Link className="btn" to="/services">All services ↗</Link>
         </div>
@@ -236,11 +236,11 @@ export default function Home() {
         </div>
         <div className="cw-posts">
           {POSTS.slice(0, 3).map(([title, tag, body]) => (
-            <article className="cw-post" key={title}>
+            <Link className="cw-post" key={title} to={`/blog/${postSlug(title)}`}>
               <span className="badge gold">{tag}</span>
               <h3>{title}</h3>
               <p>{body}</p>
-            </article>
+            </Link>
           ))}
         </div>
       </section>
