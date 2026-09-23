@@ -1,19 +1,5 @@
 import { useEffect, useState } from 'react'
 
-// Tiny hash router: '#/app/...' for customer, '#/admin/...' for staff.
-export function useHashRoute() {
-  const [hash, setHash] = useState(() => window.location.hash || '#/')
-  useEffect(() => {
-    const onChange = () => setHash(window.location.hash || '#/')
-    window.addEventListener('hashchange', onChange)
-    return () => window.removeEventListener('hashchange', onChange)
-  }, [])
-  const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean)
-  return { hash, parts } // e.g. ['app','orders'] or ['admin','leads']
-}
-
-export function navigate(to) { window.location.hash = to }
-
 // Fetch-on-mount helper: { data, error, loading, retry }
 export function useAsync(fn, deps = []) {
   const [state, setState] = useState({ data: null, error: null, loading: true })

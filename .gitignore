@@ -2,8 +2,11 @@ node_modules/
 runtime.json
 diag-*
 *.log
+backend.err
 .env
 .env.local
 frontend/dist/
+frontend/test-results/
+frontend/audit-shots/
 api-table.tmp
 *.pid

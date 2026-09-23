@@ -1,0 +1,20 @@
+services:
+  api:
+    build: .
+    image: customwear:latest
+    ports:
+      - "${PORT:-4300}:4300"
+    environment:
+      PORT: 4300
+      HOST: 0.0.0.0
+      DATA_DIR: /app/data
+      PERSIST: ${PERSIST:-0}
+      WHATSAPP_NUMBER: ${WHATSAPP_NUMBER:-}
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4300/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped

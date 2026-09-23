@@ -109,6 +109,13 @@ async function main() {
       eq(mm.body.details.allow.join(','), 'GET', 'allow list')
     })
 
+    await check('GET /api returns the API index JSON', async () => {
+      const { status, body } = await api('GET', '/api')
+      eq(status, 200, 'status')
+      truthy(Array.isArray(body.endpoints) && body.endpoints.length > 30, 'endpoints')
+      eq(body.database, 'not connected', 'database')
+    })
+
     section('1. public catalogue')
     await check('catalogue metadata is public and shaped', async () => {
       const cats = await api('GET', '/api/catalogue/categories')
@@ -128,7 +135,7 @@ async function main() {
       truthy(body.total >= 12, 'total products')
       eq(body.products.length, body.total, 'products length matches total')
       const cats = new Set(body.products.map((p) => p.category))
-      for (const c of ['polo', 'tshirt', 'jersey', 'hoodie', 'uniform', 'private-label']) {
+      for (const c of ['polo', 'tshirt', 'jersey', 'hoodie', 'staff-apparel', 'private-label']) {
         truthy(cats.has(c), `category ${c}`)
       }
       for (const p of body.products) {

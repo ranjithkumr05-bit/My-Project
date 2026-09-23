@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: customwear-config
+data:
+  PORT: "4300"
+  HOST: "0.0.0.0"
+  DATA_DIR: "/app/data"
+  PERSIST: "0"

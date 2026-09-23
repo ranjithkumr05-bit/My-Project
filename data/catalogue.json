@@ -8,7 +8,7 @@
       "tshirt": 100,
       "jersey": 50,
       "hoodie": 50,
-      "uniform": 100,
+      "staff-apparel": 100,
       "private-label": 300
     },
     "sizes": ["XS", "S", "M", "L", "XL", "2XL", "3XL"],
@@ -47,8 +47,8 @@
     { "id": "p-jersey-002", "category": "jersey", "name": "Cricket Match Jersey", "fabric": "micro-mesh", "gsm": 170, "colors": ["Custom full-colour"], "moq": 50, "leadTimeDays": 22, "branding": ["sublimation"], "indicativePrice": 395 },
     { "id": "p-hoodie-001", "category": "hoodie", "name": "Fleece Pullover Hoodie", "fabric": "fleece-brushed", "gsm": 320, "colors": ["Charcoal", "Navy", "Black", "Sand"], "moq": 50, "leadTimeDays": 24, "branding": ["screen-print", "embroidery", "woven-label"], "indicativePrice": 720 },
     { "id": "p-hoodie-002", "category": "hoodie", "name": "Zip-Through Work Hoodie", "fabric": "fleece-brushed", "gsm": 340, "colors": ["Charcoal", "Hi-Vis Orange"], "moq": 50, "leadTimeDays": 26, "branding": ["screen-print", "embroidery", "hangtag"], "indicativePrice": 845 },
-    { "id": "p-uniform-001", "category": "uniform", "name": "School Uniform Set", "fabric": "canvas-twill", "gsm": 240, "colors": ["White / Bottle Green", "White / Navy"], "moq": 100, "leadTimeDays": 28, "branding": ["embroidery", "woven-label"], "indicativePrice": 335 },
-    { "id": "p-uniform-002", "category": "uniform", "name": "Industrial Workwear Set", "fabric": "canvas-twill", "gsm": 280, "colors": ["Navy", "Charcoal"], "moq": 100, "leadTimeDays": 30, "branding": ["embroidery", "screen-print", "hangtag"], "indicativePrice": 690 },
+    { "id": "p-staff-001", "category": "staff-apparel", "name": "School Campus Tee Set", "fabric": "canvas-twill", "gsm": 240, "colors": ["White / Bottle Green", "White / Navy"], "moq": 100, "leadTimeDays": 28, "branding": ["embroidery", "woven-label"], "indicativePrice": 335 },
+    { "id": "p-staff-002", "category": "staff-apparel", "name": "Workshop Staff Tee Set", "fabric": "canvas-twill", "gsm": 280, "colors": ["Navy", "Charcoal"], "moq": 100, "leadTimeDays": 30, "branding": ["embroidery", "screen-print", "hangtag"], "indicativePrice": 690 },
     { "id": "p-pl-001", "category": "private-label", "name": "Private Label Programme (full package)", "fabric": "cotton-single", "gsm": 180, "colors": ["Your specification"], "moq": 300, "leadTimeDays": 35, "branding": ["woven-label", "hangtag", "dtf"], "indicativePrice": 265 },
     { "id": "p-pl-002", "category": "private-label", "name": "Retail-Ready Fleece Programme", "fabric": "fleece-brushed", "gsm": 320, "colors": ["Your specification"], "moq": 300, "leadTimeDays": 38, "branding": ["woven-label", "hangtag", "embroidery"], "indicativePrice": 780 }
   ]

@@ -7,6 +7,7 @@ import { ApiError, applyCors, parseQuery, readJson, sendJson } from './src/http.
 import { EVENTS, webhookConfigured } from './src/notify.mjs'
 import { sessionCount } from './src/auth.mjs'
 import { counts, PERSIST } from './src/store.mjs'
+import { acceptsHtml, distHasIndex, serveIndex, serveStaticFile } from './src/static.mjs'
 
 const PORT = Number(process.env.PORT || 4300)
 const HOST = process.env.HOST || '0.0.0.0'
@@ -54,6 +55,56 @@ async function handle(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`)
   let status = 500
   try {
+    // 1. API index (explicit, always JSON).
+    if (url.pathname === '/api') {
+      status = 200
+      sendJson(res, status, index())
+      return
+    }
+    // 2. API routes — JSON only, never the SPA fallback.
+    if (url.pathname === '/api/' || url.pathname.startsWith('/api/')) {
+      const hit = resolve(req.method, url.pathname)
+      if (!hit) throw new ApiError(404, `No route for ${req.method} ${url.pathname}`, { hint: 'GET /api lists every endpoint' })
+      if (hit.methodMismatch) throw new ApiError(405, `${req.method} is not allowed on ${url.pathname}`, { allow: allowFor(url.pathname) })
+      const body = ['POST', 'PATCH', 'PUT'].includes(req.method) ? await readJson(req) : {}
+      const result = await hit.route.handler({ req, res, params: hit.params, query: parseQuery(url), body })
+      const wrapped = statusOf(result)
+      status = wrapped ? wrapped[STATUS] : 200
+      sendJson(res, status, wrapped ? wrapped.data : result)
+      return
+    }
+    // 3. Static files from frontend/dist (GET/HEAD only).
+    if ((req.method === 'GET' || req.method === 'HEAD') && await distHasIndex()) {
+      if (req.method === 'HEAD' && (url.pathname === '/' || url.pathname === '/api')) {
+        status = 200
+        sendJson(res, status, index())
+        return
+      }
+      if (url.pathname !== '/') {
+        try {
+          if (await serveStaticFile(req, res, url.pathname)) {
+            status = 200
+            return // serveStaticFile already ended the response (GET and HEAD)
+          }
+        } catch { /* fall through to SPA/404 below */ }
+      }
+      // 4. Root + SPA fallback with content negotiation:
+      //    browsers (Accept: text/html) get index.html; API clients keep JSON.
+      if (req.method === 'GET') {
+        if (acceptsHtml(req)) {
+          await serveIndex(res)
+          status = 200
+          return
+        }
+        if (url.pathname === '/') {
+          status = 200
+          sendJson(res, status, index()) // backward compat: JSON for non-HTML clients
+          return
+        }
+        throw new ApiError(404, `No route for ${req.method} ${url.pathname}`, { hint: 'GET /api lists every endpoint' })
+      }
+      throw new ApiError(404, `No route for ${req.method} ${url.pathname}`, { hint: 'GET /api lists every endpoint' })
+    }
     if (url.pathname === '/' || url.pathname === '/api') {
       status = 200
       sendJson(res, status, index())

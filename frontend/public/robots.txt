@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://customwear.example.com/sitemap.xml
