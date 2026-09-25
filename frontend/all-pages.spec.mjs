@@ -84,7 +84,10 @@ test('primary nav drops Process from the header but keeps every route navigable'
     await expect(page).toHaveURL(new RegExp(`${path.replace('/', '\\/')}$`))
     await page.goBack()
   }
-  await page.locator('footer nav[aria-label="footer"]').getByRole('link', { name: 'Process' }).click()
+  // Process now sits in neither nav — the footer lists the six public routes — so the
+  // route stays navigable through the Home journey CTA instead.
+  await expect(page.locator('footer nav[aria-label="footer"]').getByRole('link', { name: 'Process' })).toHaveCount(0)
+  await page.getByRole('link', { name: 'Full process' }).click()
   await expect(page).toHaveURL(/\/process$/)
 })
 
@@ -175,4 +178,31 @@ test('shared WiFi URL is reachable and serves the site', async ({ request }) => 
   const res = await request.get(`${LAN_URL}/portfolio`, { headers: { accept: 'text/html' } })
   expect(res.status()).toBe(200)
   expect(res.headers()['content-type']).toContain('text/html')
+})
+
+test('footer: 4 columns collapse to 1, with social, contact, WhatsApp and legal links wired up', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await load(page, '/')
+  const cols = () => page.locator('.cw-foot-grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length)
+  expect(await cols(), 'desktop footer should be 4 columns').toBe(4)
+
+  // Products stays the curated five + the "view all" escape hatch, not the full catalogue.
+  await expect(page.locator('footer nav[aria-label="footer products"] a')).toHaveCount(6)
+  await expect(page.locator('footer nav[aria-label="footer products"]')).toContainText('View all products')
+  await expect(page.locator('footer nav[aria-label="footer"] a')).toHaveCount(6)
+
+  await expect(page.locator('.cw-foot-social a')).toHaveCount(3)
+  await expect(page.locator('.cw-foot-social a[aria-label="Customwear on Instagram"]')).toBeVisible()
+  await expect(page.locator('.cw-foot-contact a[href^="tel:"]')).toHaveCount(1)
+  await expect(page.locator('.cw-foot-contact a[href^="mailto:"]')).toHaveAttribute('href', 'mailto:sales@customwear.in')
+  await expect(page.locator('.cw-foot-gstin')).toContainText('GSTIN')
+
+  // Green brand button with navy ink — white on #25d366 is only 1.9:1.
+  const wa = await page.locator('.cw-foot-wa').evaluate((el) => { const s = getComputedStyle(el); return `${s.backgroundColor}|${s.color}` })
+  expect(wa).toBe('rgb(37, 211, 102)|rgb(10, 22, 40)')
+  await expect(page.locator('.cw-foot-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/\d+/)
+  await expect(page.locator('.cw-foot-legal a')).toHaveCount(2)
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  expect(await cols(), 'footer should stack on mobile').toBe(1)
 })

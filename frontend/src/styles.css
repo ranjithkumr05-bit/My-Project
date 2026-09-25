@@ -398,7 +398,8 @@ a.cw-post:hover { border-color: var(--gold-500); transform: translateY(-2px); bo
 }
 .cw-foot-grid {
   max-width: 1180px; margin: 0 auto; /* matches .shell width */
-  display: grid; grid-template-columns: 1.5fr 1fr 1.4fr 1.2fr; gap: var(--sp-8) var(--sp-7);
+  /* Brand and contact carry the most content, so they get the wider tracks. */
+  display: grid; grid-template-columns: 1.6fr .9fr 1.1fr 1.5fr; gap: var(--sp-8) var(--sp-7);
   align-items: start;
 }
 .cw-foot-title {
@@ -410,15 +411,29 @@ a.cw-post:hover { border-color: var(--gold-500); transform: translateY(-2px); bo
    audit; a full-height row costs nothing visually in a dark footer. */
 .cw-footer nav a { color: #cdd6e4; text-decoration: none; font-size: var(--fs-sm); line-height: 1.5; display: flex; align-items: center; min-height: var(--tap); }
 .cw-footer nav a:hover { color: var(--gold-500); }
-.cw-foot-brand .muted, .cw-foot-contact .muted { font-size: var(--fs-sm); line-height: var(--lh-body); max-width: 38ch; margin: var(--sp-3) 0 0; }
-/* the mailto is a standalone link, not prose: give it a real hit area */
-.cw-foot-contact a { color: var(--gold-500); text-decoration: none; display: inline-flex; align-items: center; min-height: var(--tap); }
-.cw-foot-contact a:hover { text-decoration: underline; }
+.cw-foot-desc { font-size: var(--fs-sm); line-height: var(--lh-body); max-width: 46ch; margin: var(--sp-3) 0 0; }
+/* Social marks: round 44px targets so the row stays tappable at 360px. */
+.cw-foot-social { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-5) 0 0; }
+.cw-foot-social a { display: inline-flex; align-items: center; justify-content: center; width: var(--tap); height: var(--tap); border: 1px solid rgba(255, 255, 255, .2); border-radius: var(--radius-pill); color: #cdd6e4; text-decoration: none; transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.cw-foot-social a:hover { color: var(--gold-500); border-color: var(--gold-500); }
+/* Contact stack: icon + value rows, muted like the rest of the footer so gold stays
+   reserved for hover states and the WhatsApp CTA. */
+.cw-foot-line { display: grid; grid-template-columns: 18px 1fr; align-items: center; gap: var(--sp-3); margin: var(--sp-3) 0 0; color: #d7deea; font-size: var(--fs-sm); line-height: var(--lh-body); text-decoration: none; }
+a.cw-foot-line { min-height: var(--tap); }
+a.cw-foot-line:hover { color: var(--gold-500); }
+/* Green brand button. Navy ink, not white: white on #25d366 is only 1.9:1. */
+.cw-foot-wa { display: inline-flex; align-items: center; gap: var(--sp-2); margin-top: var(--sp-5); min-height: var(--tap-lg); padding: 0 var(--sp-5); background: #25d366; color: var(--navy-900); font-weight: 700; font-size: var(--fs-btn); border-radius: var(--radius-btn); text-decoration: none; transition: background var(--dur) var(--ease); }
+.cw-foot-wa:hover { background: #1da851; color: var(--navy-900); }
+.cw-foot-gstin { margin: var(--sp-4) 0 0; color: #98a4b8; font-size: var(--fs-xs); letter-spacing: .02em; }
 .cw-foot-bottom {
   max-width: 1180px; margin: var(--sp-7) auto 0; padding-top: var(--sp-4);
   border-top: 1px solid rgba(255, 255, 255, .08);
   color: #d7deea; font-size: var(--fs-sm);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-5);
 }
+.cw-foot-legal { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-6); }
+.cw-foot-legal a { display: inline-flex; align-items: center; min-height: var(--tap); color: #d7deea; text-decoration: none; }
+.cw-foot-legal a:hover { color: var(--gold-500); }
 
 @media (max-width: 1100px) {
   .cw-hero-fs { grid-template-columns: 1fr; }

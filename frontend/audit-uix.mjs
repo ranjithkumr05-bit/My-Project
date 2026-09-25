@@ -158,7 +158,9 @@ for (const [w, h] of VIEWPORTS) {
         overflow: de.scrollWidth - de.clientWidth,
         out,
         hrefs: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')),
-        deadAnchors: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((x) => !x || x === '#' || x === 'javascript:void(0)'),
+        // data-placeholder marks a link that is deliberately inert until its page exists
+        // (footer Privacy/Terms); every other empty/# href is still a hard finding.
+        deadAnchors: [...document.querySelectorAll('a[href]')].filter((a) => !a.dataset.placeholder).map((a) => a.getAttribute('href')).filter((x) => !x || x === '#' || x === 'javascript:void(0)'),
         headings: [...document.querySelectorAll('h1, h2, h3')].map((e) => [e.tagName, e.textContent.trim()]),
         imgs: [...document.querySelectorAll('img')].map((i) => {
           const r = i.getBoundingClientRect()
@@ -198,7 +200,7 @@ for (const [w, h] of VIEWPORTS) {
     for (const t of a11y.targets) add('med', route, vp, 'touch-target', `${t.selector} ${t.w}x${t.h}`)
 
     for (const href of new Set(layout.hrefs)) {
-      if (/^(https?:|mailto:|#)/.test(href)) continue
+      if (/^(https?:|mailto:|tel:|#)/.test(href)) continue
       const p = href.split('?')[0].replace(/\/$/, '') || '/'
       if (!KNOWN.has(p)) add('high', route, vp, 'unknown-dest', href)
     }
@@ -264,9 +266,10 @@ for (const [w, h] of VIEWPORTS) {
 // --- navigation integrity: every header/footer link resolves to its own page ---
 {
   await fresh('/', 1440, 900)
-  const links = await page.evaluate(() => [...document.querySelectorAll('.cw-header a[href], .cw-footer a[href]')].map((a) => ({ t: a.textContent.trim(), h: a.getAttribute('href') })))
-  for (const { t, h } of links) {
-    if (/^(https?:|mailto:)/.test(h)) continue
+  const links = await page.evaluate(() => [...document.querySelectorAll('.cw-header a[href], .cw-footer a[href]')].map((a) => ({ t: a.textContent.trim(), h: a.getAttribute('href'), ph: !!a.dataset.placeholder })))
+  for (const { t, h, ph } of links) {
+    // ph = deliberate placeholder (no page yet); tel: dials rather than routes.
+    if (ph || /^(https?:|mailto:|tel:)/.test(h)) continue
     const dest = h.split('?')[0].replace(/\/$/, '') || '/'
     if (!KNOWN.has(dest)) { add('high', '/header-footer', '1440x900', 'bad-nav-href', `${t} â†’ ${h}`); continue }
     await page.goto(`${BASE}${h}`, { waitUntil: 'load' })
