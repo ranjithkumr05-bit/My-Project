@@ -26,7 +26,7 @@ export default function Portfolio() {
           />
         ))}
       </div>
-      <div className="cw-cta-band" style={{ marginTop: '28px' }}>
+      <div className="cw-cta-band" style={{ marginTop: 'var(--sp-7)' }}>
         <h2>Have an Apparel Project in Mind?</h2>
         <p className="cw-lead">Share your requirements - we quote it, sample it, then produce it.</p>
         <div className="cw-cta-row" style={{ justifyContent: 'center' }}>

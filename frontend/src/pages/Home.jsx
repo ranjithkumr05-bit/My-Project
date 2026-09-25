@@ -1,22 +1,13 @@
-// pages/Home.jsx — full customer journey: hero → trust → services → why us →
-// process → portfolio → customization → sample → quote CTA → blog.
+// pages/Home.jsx — customer journey: hero → trust → services →
+// process → customization → sample → quote CTA.
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ServiceCard from '../components/ServiceCard.jsx'
-import { POSTS, postSlug } from './Blog.jsx'
+import Icon from '../components/Icon.jsx'
 import { PROCESS_STEPS } from './Process.jsx'
 import { REQUIRED_SLUGS, serviceBySlug } from '../data/services.js'
 
 const TILE_ORDER = REQUIRED_SLUGS
-
-const WHY_US = [
-  ['Custom designs, your branding', 'Share artwork or a rough idea — print, embroidery and private labels ship with the garment.'],
-  ['Eight apparel categories', 'Polos, tees, jerseys, hoodies and more — one enquiry can cover a mixed programme.'],
-  ['One team coordinates the run', 'Sourcing, cutting, printing/finishing arrangements and stitching are lined up for you.'],
-  ['Checked before dispatch', 'Finished lots are inspected for measurements, seams and finish before packing.'],
-  ['Packed and arranged for delivery', 'Polybagged, tagged and cartonised to your packing note, with delivery arranged.'],
-  ['Friendly to smaller bulk runs', 'Minimums start around 10 pieces — enquire with your quantity and timeline.'],
-]
 
 const BRANDING = [
   ['Logo printing', 'Chest, sleeve and back prints matched to your artwork.'],
@@ -50,15 +41,15 @@ export default function Home() {
         <div className="cw-hero-overlay" />
         <div className="cw-hero-inner">
           <div className="cw-hero-left">
-            <p className="cw-kicker-pill"><span className="dot" aria-hidden="true" /> Tiruppur · B2B apparel manufacturing</p>
-            <h1>Custom apparel, made for your team.</h1>
+            <p className="cw-kicker-pill"><span className="dot" aria-hidden="true" /> Apparel · Workwear · Private Label</p>
+            <h1>We build exactly to your spec.</h1>
             <p className="cw-hero-sub">
-              Polos, t-shirts, jerseys and hoodies for businesses, teams and stores —
-              manufactured in Tiruppur from around 10 pieces, with your branding.
+              Your Tiruppur partner for custom tees, teamwear, jerseys and private-label
+              runs — from around 10 pieces, sampled before bulk, delivered to your door.
             </p>
             <div className="cw-hero-ctas">
-              <Link className="cw-gold-btn" to="/contact?type=quote">Get a Quote <span aria-hidden="true">↗</span></Link>
-              <Link className="cw-ghost-btn" to="/services">Explore Our Apparel</Link>
+              <Link className="cw-gold-btn" to="/services">Explore Our Services <Icon name="arrow" /></Link>
+              <Link className="cw-ghost-btn" to="/contact?type=quote">Get a Quote</Link>
             </div>
           </div>
 
@@ -70,7 +61,7 @@ export default function Home() {
             <div className="cw-hero-card">
               <strong>8</strong>
               <span>product categories</span>
-              <Link className="cw-card-arrow" to="/services" aria-label="View services">↗</Link>
+
             </div>
             <div className="cw-hero-card">
               <strong>6</strong>
@@ -102,7 +93,7 @@ export default function Home() {
                 <span key={s} className="cw-flow-step"><em>{i + 1}</em>{s}</span>
               ))}
             </div>
-            <Link className="btn" to="/about">About our background ↗</Link>
+            <Link className="btn" to="/about">About our background <Icon name="arrow" /></Link>
           </div>
         </div>
       </section>
@@ -113,7 +104,7 @@ export default function Home() {
             <p className="cw-kicker">What we make</p>
             <h2>Every category is made on one manufacturing floor</h2>
           </div>
-          <Link className="btn" to="/services">All services ↗</Link>
+          <Link className="btn" to="/services">All services <Icon name="arrow" /></Link>
         </div>
         <div className="cw-cards">
           {TILE_ORDER.map((slug) => {
@@ -123,32 +114,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="cw-section cw-why">
-        <div className="cw-grid2">
-          <div>
-            <p className="cw-kicker">Why Customwear</p>
-            <h2>Why buyers work with us</h2>
-            <p className="cw-lead">No big claims — just the things we actually coordinate on every order.</p>
-            <img src="/showcase/mfg-quality.jpg" alt="Quality inspection of finished garments" loading="lazy" width="672" height="504" className="cw-why-img" />
-          </div>
-          <ul className="cw-why-list">
-            {WHY_US.map(([title, desc]) => (
-              <li key={title}>
-                <strong>{title}</strong>
-                <span>{desc}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
       <section className="cw-section">
         <div className="cw-sec-head">
           <div>
             <p className="cw-kicker">How it works</p>
             <h2>From requirement to delivery, in five steps</h2>
           </div>
-          <Link className="btn" to="/process">Full process ↗</Link>
+          <Link className="btn" to="/process">Full process</Link>
         </div>
         <ol className="cw-timeline">
           {[
@@ -172,29 +144,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="cw-section">
-        <div className="cw-sec-head">
-          <div>
-            <p className="cw-kicker">Recent work</p>
-            <h2>A look at our apparel</h2>
-          </div>
-          <Link className="btn" to="/portfolio">Portfolio ↗</Link>
-        </div>
-        <p className="muted" style={{ maxWidth: '62ch' }}>Sample imagery from our categories — representative of what we make, not labelled as client projects.</p>
-        <div className="cw-home-work">
-          {['p-office-corporate', 'p-sportswear', 'p-school-college-tshirts', 'p-hoodies'].map((img) => (
-            <img key={img} src={`/showcase/${img}.jpg`} alt={`${img.replace(/^p-/, '').replace(/-/g, ' ')} example`} loading="lazy" width="904" height="600" />
-          ))}
-        </div>
-      </section>
-
       <section className="cw-section cw-brandband">
         <div className="cw-grid2">
           <div>
             <p className="cw-kicker">Customization & branding</p>
             <h2>Your logo, colours and labels — discussed upfront</h2>
             <p>Tell us how the garment should carry your brand. We confirm what is practical for your fabric and quantity before quoting.</p>
-            <Link className="cw-gold-btn" to="/contact?type=quote&service=private-label">Discuss private label ↗</Link>
+            <Link className="cw-gold-btn" to="/contact?type=quote&service=private-label">Discuss private label <Icon name="arrow" /></Link>
           </div>
           <ul className="cw-brand-list">
             {BRANDING.map(([title, desc]) => (
@@ -213,7 +169,7 @@ export default function Home() {
             <h2>Want to Explore a Sample?</h2>
             <p>Tell us which apparel you are interested in and what you need. Contact our team to discuss sample availability and the next steps for your requirement.</p>
           </div>
-          <Link className="cw-gold-btn" to="/contact?type=sample">Request a Sample <span aria-hidden="true">↗</span></Link>
+          <Link className="cw-gold-btn" to="/contact?type=sample">Request a Sample <Icon name="arrow" /></Link>
         </div>
       </section>
 
@@ -221,27 +177,8 @@ export default function Home() {
         <h2>Have an Apparel Project in Mind?</h2>
         <p className="cw-lead">Share your apparel requirements, approximate quantity, design ideas, and preferred timeline. Our team can discuss the next steps with you.</p>
         <div className="cw-cta-row">
-          <Link className="cw-gold-btn" to="/contact?type=quote">Get a Quote <span aria-hidden="true">↗</span></Link>
+          <Link className="cw-gold-btn" to="/contact?type=quote">Get a Quote <Icon name="arrow" /></Link>
           <Link className="btn" to="/contact?type=sample">Request a Sample</Link>
-        </div>
-      </section>
-
-      <section className="cw-section">
-        <div className="cw-sec-head">
-          <div>
-            <p className="cw-kicker">Buyer notes</p>
-            <h2>Useful reading before you enquire</h2>
-          </div>
-          <Link className="btn" to="/blog">All notes ↗</Link>
-        </div>
-        <div className="cw-posts">
-          {POSTS.slice(0, 3).map(([title, tag, body]) => (
-            <Link className="cw-post" key={title} to={`/blog/${postSlug(title)}`}>
-              <span className="badge gold">{tag}</span>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </Link>
-          ))}
         </div>
       </section>
     </>

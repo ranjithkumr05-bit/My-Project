@@ -1,5 +1,6 @@
 // pages/Blog.jsx — genuine buyer-education notes (no dates/authors invented).
 import { Link, Navigate, useParams } from 'react-router-dom'
+import Icon from '../components/Icon.jsx'
 
 export const POSTS = [
   ['Choosing GSM for your programme', 'Buying Guide', 'Fabric weight decides drape, cost and durability. 160 GSM suits promo tees; 180–200 GSM works for retail; 300+ GSM for fleece. We match GSM to use-case before quoting.'],
@@ -38,14 +39,14 @@ export function BlogPost() {
   const [title, tag, body] = post
   return (
     <section className="cw-section cw-page">
-      <Link className="cw-backlink" to="/blog">← All notes</Link>
-      <div style={{ marginTop: '16px' }}>
+      <Link className="cw-backlink" to="/blog"><Icon name="back" size={18} /> All notes</Link>
+      <div style={{ marginTop: 'var(--sp-4)' }}>
         <span className="badge gold">{tag}</span>
       </div>
       <h1>{title}</h1>
-      <p className="cw-lead" style={{ maxWidth: '68ch' }}>{body}</p>
-      <div className="cw-cta-row" style={{ marginTop: '24px' }}>
-        <Link className="cw-gold-btn" to="/contact?type=quote">Get a Quote <span aria-hidden="true">↗</span></Link>
+      <p className="cw-lead" style={{ maxWidth: 'var(--measure)' }}>{body}</p>
+      <div className="cw-cta-row" style={{ marginTop: 'var(--sp-6)' }}>
+        <Link className="cw-gold-btn" to="/contact?type=quote">Get a Quote <Icon name="arrow" /></Link>
         <Link className="btn" to="/services">Explore our apparel</Link>
       </div>
     </section>

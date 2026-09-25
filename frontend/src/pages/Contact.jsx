@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CONTACT_EMAIL, SERVICES, WA_DEFAULT_MSG, serviceBySlug, waLink } from '../data/services.js'
+import Icon from '../components/Icon.jsx'
 
 const TYPES = [
   ['quote', 'Get a Quote'],
@@ -59,7 +60,7 @@ export default function Contact() {
       <div className="cw-grid2">
         {state.done ? (
           <div className="cw-card cw-thanks">
-            <h2>Enquiry received ✔</h2>
+            <h2>Enquiry received <Icon name="check" /></h2>
             <p>Our team will reach out. Reference your name in any follow-up.</p>
             <Link className="btn" to="/portfolio">Browse the portfolio meanwhile</Link>
           </div>

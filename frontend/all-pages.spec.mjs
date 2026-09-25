@@ -6,11 +6,13 @@ import { REQUIRED_SLUGS, serviceBySlug } from './src/data/services.js'
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:4300'
 // LAN URL resolves this machine's current IPv4 (override with WIFI_URL); the IP can
-// change when the network changes, so never hardcode it here.
+// change when the network changes, so never hardcode it here. Same server as BASE,
+// just reached over the LAN interface — so take the port from BASE too, or a dev
+// server on a non-default port (Vite 5174, backend 4399) fails this check.
 const LAN_URL = process.env.WIFI_URL || (() => {
   const ip = Object.values(os.networkInterfaces()).flat()
     .find((i) => i && !i.internal && i.family === 'IPv4')?.address
-  return ip ? `http://${ip}:4300` : null
+  return ip ? `http://${ip}:${new URL(BASE).port || 80}` : null
 })()
 const PUBLIC_ROUTES = ['/', '/about', '/services', '/process', '/portfolio', '/blog', '/contact']
 const SERVICE_ROUTES = REQUIRED_SLUGS.map((s) => `/services/${s}`)
@@ -70,17 +72,20 @@ test('each service page shows exactly 8 subcategories and a quote link to /conta
   }
 })
 
-test('primary nav covers all 7 pages and each navigates', async ({ page }) => {
+test('primary nav drops Process from the header but keeps every route navigable', async ({ page }) => {
   await load(page, '/')
-  const navLinks = ['Home', 'About', 'Services', 'Process', 'Portfolio', 'Blog', 'Get a Quote']
-  for (const label of navLinks) {
+  const headerLinks = ['Home', 'About', 'Services', 'Portfolio', 'Blog', 'Get a Quote']
+  for (const label of headerLinks) {
     await expect(page.locator('.cw-nav').getByRole('link', { name: label })).toBeVisible()
   }
-  for (const [label, path] of [['About', '/about'], ['Process', '/process'], ['Blog', '/blog']]) {
+  await expect(page.locator('.cw-nav').getByRole('link', { name: 'Process' })).toHaveCount(0)
+  for (const [label, path] of [['About', '/about'], ['Portfolio', '/portfolio'], ['Blog', '/blog']]) {
     await page.locator('.cw-nav').getByRole('link', { name: label }).click()
     await expect(page).toHaveURL(new RegExp(`${path.replace('/', '\\/')}$`))
     await page.goBack()
   }
+  await page.locator('footer nav[aria-label="footer"]').getByRole('link', { name: 'Process' }).click()
+  await expect(page).toHaveURL(/\/process$/)
 })
 
 test('mobile menu opens, navigates and closes at 390px', async ({ page }) => {
@@ -145,12 +150,24 @@ test('unknown route falls back to Home for browsers', async ({ page }) => {
   await expect(page.locator('h1').first()).toBeVisible()
 })
 
-test('home hero: 10 pcs MOQ card and category arrow points to /services', async ({ page }) => {
+test('home hero: 10 pcs MOQ card and category card has no overlapping action icon', async ({ page }) => {
   await load(page, '/')
+  // One metric area only: the split hero keeps the right column, no duplicate bottom row.
+  await expect(page.locator('.cw-hero-card')).toHaveCount(4)
+  await expect(page.locator('.cw-hero-stats')).toHaveCount(0)
   await expect(page.locator('.cw-hero-card').filter({ hasText: 'minimum order quantity' })).toContainText('10 pcs')
-  await expect(page.locator('a[aria-label="View services"]')).toHaveAttribute('href', '/services')
-  await page.locator('a[aria-label="View services"]').click()
-  await expect(page).toHaveURL(/\/services$/)
+  await expect(page.locator('.cw-hero-card').filter({ hasText: 'product categories' }).locator('svg')).toHaveCount(0)
+})
+
+test('service cards: CTA buttons share a bottom baseline in each desktop row', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await load(page, '/services')
+  const bottoms = await page.$$eval('.cw-cards .cw-service-card', (cards) => cards.map((c) => c.querySelector('.cw-card-ctas').getBoundingClientRect().bottom))
+  expect(bottoms).toHaveLength(8)
+  for (let row = 0; row < 2; row += 1) {
+    const slice = bottoms.slice(row * 4, row * 4 + 4)
+    expect(Math.max(...slice) - Math.min(...slice), `row ${row + 1} CTA bottoms: ${slice.join(', ')}`).toBeLessThanOrEqual(1)
+  }
 })
 
 test('shared WiFi URL is reachable and serves the site', async ({ request }) => {

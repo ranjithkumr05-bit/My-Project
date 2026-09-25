@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import PageShell from './components/PageShell.jsx'
+import Icon from './components/Icon.jsx'
 import { Auth, getToken, setToken } from './api.js'
 import { Loading } from './ui.jsx'
 import { Login } from './pages/Login.jsx'
@@ -44,12 +45,12 @@ function PortalShell({ user, booting, allow, children, onLogout }) {
   return (
     <div className="shell">
       <header className="topbar">
-        <Link className="brand" to="/">Custom<em>wear</em></Link>
+        <Link className="brand" to="/"><img className="brand-logo" src="/logo-small.png" alt="Customwear logo" width="40" height="40" /><span className="brand-text">CUSTOM<em>WEAR</em></span></Link>
         <nav className="nav" aria-label="portal">
           {nav.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}
         </nav>
         <div className="row">
-          <Link className="cw-backlink" to="/">← Site</Link>
+          <Link className="cw-backlink" to="/"><Icon name="back" size={18} /> Site</Link>
           <span className="muted">{user.email} · {user.role}</span>
           <button className="btn" onClick={onLogout}>Log out</button>
         </div>

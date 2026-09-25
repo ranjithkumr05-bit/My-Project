@@ -15,7 +15,7 @@ export default function Process() {
     <section className="cw-section cw-page">
       <h1>Our Manufacturing Process</h1>
       <p className="cw-lead">From fabric to shipped carton — six defined stages, visible to you at every step.</p>
-      <div className="cw-grid2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '18px' }}>
+      <div className="cw-grid2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--sp-5)' }}>
         {PROCESS_STEPS.map(([title, img, desc], i) => (
           <div key={title} className="cw-step-card">
             <span className="cw-step-badge">
@@ -29,7 +29,7 @@ export default function Process() {
           </div>
         ))}
       </div>
-      <div style={{ marginTop: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <div style={{ marginTop: 'var(--sp-6)', display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap', justifyContent: 'center' }}>
         <Link className="btn btn-gold" to="/contact">Start a programme</Link>
         <Link className="btn" to="/services">See all services</Link>
       </div>

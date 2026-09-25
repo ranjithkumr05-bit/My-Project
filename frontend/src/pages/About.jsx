@@ -35,7 +35,7 @@ export default function About() {
           </p>
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px', marginTop: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--sp-4)', marginTop: 'var(--sp-7)' }}>
         {stats.map(([value, label]) => (
           <div key={label} className="cw-stat-card">
             <div className="cw-stat-value">{value}</div>

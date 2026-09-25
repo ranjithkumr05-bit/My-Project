@@ -3,7 +3,8 @@
 // Gallery pics/contents are intentionally absent (to be set separately).
 import { test, expect } from '@playwright/test'
 
-const BASE = 'http://127.0.0.1:4300'
+// Override for a dev server on a non-default port: BASE_URL=http://localhost:5174
+const BASE = process.env.BASE_URL || 'http://127.0.0.1:4300'
 
 test.describe.configure({ mode: 'parallel' })
 

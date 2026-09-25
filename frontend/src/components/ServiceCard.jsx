@@ -1,5 +1,6 @@
 // components/ServiceCard.jsx — main-category card (image + title + description + CTA).
 import { Link } from 'react-router-dom'
+import Icon from './Icon.jsx'
 import { IMG_DIMS, MISSING_IMAGES, imgSrc, imgSrcFallback } from '../data/services.js'
 
 export default function ServiceCard({ svc }) {
@@ -8,7 +9,7 @@ export default function ServiceCard({ svc }) {
   const [w, h] = IMG_DIMS[svc.image] || [800, 1000]
   const missing = MISSING_IMAGES.includes(svc.image)
   return (
-    <article className="cw-card">
+    <article className="cw-card cw-service-card">
       <Link to={`/services/${svc.slug}`} aria-label={`Explore ${svc.name}`}>
         {missing ? (
           <div className="cw-img-missing" role="img" aria-label={svc.alt}>
@@ -29,7 +30,7 @@ export default function ServiceCard({ svc }) {
       <h3>{svc.name}</h3>
       <p>{svc.description}</p>
       <div className="cw-card-ctas">
-        <Link className="btn btn-gold" to={`/services/${svc.slug}`}>Explore {svc.short} ↗</Link>
+        <Link className="btn btn-gold" to={`/services/${svc.slug}`}>Explore {svc.short} <Icon name="arrow" /></Link>
       </div>
     </article>
   )
