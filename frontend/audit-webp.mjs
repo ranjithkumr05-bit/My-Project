@@ -1,7 +1,8 @@
 import fs from 'fs'
 
 function webpSize(buf) {
-  if (buf.slice(0, 4).toString('ascii') !== 'RIFF' || buf.slice(8, 12).toString('ascii') !== 'WEBP') return null
+  if (buf.slice(0, 4).toString('ascii') !== 'RIFF' || buf.slice(8, 12).toString('ascii') !== 'WEBP')
+    return null
   let off = 12
   while (off + 8 <= buf.length) {
     const fourcc = buf.slice(off, off + 4).toString('ascii')
@@ -30,7 +31,7 @@ function webpSize(buf) {
   return null
 }
 
-;['sportswear', 'hoodies'].forEach(k => {
+;['sportswear', 'hoodies'].forEach((k) => {
   const buf = fs.readFileSync(`public/showcase/${k}.jpg`)
   console.log(`${k}.jpg (real WebP) -> ${webpSize(buf)}`)
 })
@@ -38,4 +39,6 @@ function webpSize(buf) {
 // What MIME does the server map for webp?
 const st = fs.readFileSync('../../src/static.mjs', 'utf8')
 console.log('\nstatic.mjs MIME entries mentioning webp/jpg/png:')
-st.split('\n').filter(l => /webp|jpeg|jpg|png/i.test(l)).forEach(l => console.log('  ' + l.trim()))
+st.split('\n')
+  .filter((l) => /webp|jpeg|jpg|png/i.test(l))
+  .forEach((l) => console.log('  ' + l.trim()))

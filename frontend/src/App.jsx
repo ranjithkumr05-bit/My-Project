@@ -1,5 +1,5 @@
 import Router from './router.jsx'
-import { useEffect } from 'react'
+import {useEffect} from 'react'
 
 // The public marketing site is the whole app.
 // The customer/admin portal (login, dashboards, RFQ builder) stays disabled:
@@ -17,4 +17,3 @@ export default function App() {
   }, [])
   return <Router />
 }
-

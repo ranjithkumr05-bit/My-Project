@@ -1,9 +1,9 @@
 // components/ServiceCard.jsx — main-category card (image + title + description + CTA).
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import Icon from './Icon.jsx'
-import { IMG_DIMS, MISSING_IMAGES, imgSrc, imgSrcFallback } from '../data/services.js'
+import {IMG_DIMS, MISSING_IMAGES, imgSrc, imgSrcFallback} from '../data/services.js'
 
-export default function ServiceCard({ svc }) {
+export default function ServiceCard({svc}) {
   const src = imgSrc(svc.image)
   const fb = imgSrcFallback(svc.image)
   const [w, h] = IMG_DIMS[svc.image] || [800, 1000]
@@ -19,7 +19,12 @@ export default function ServiceCard({ svc }) {
         ) : (
           <img
             src={src}
-            onError={(e) => { if (!e.currentTarget.dataset.fb) { e.currentTarget.dataset.fb = '1'; e.currentTarget.src = fb } }}
+            onError={(e) => {
+              if (!e.currentTarget.dataset.fb) {
+                e.currentTarget.dataset.fb = '1'
+                e.currentTarget.src = fb
+              }
+            }}
             alt={svc.alt}
             loading="lazy"
             width={w}
@@ -30,7 +35,16 @@ export default function ServiceCard({ svc }) {
       <h3>{svc.name}</h3>
       <p>{svc.description}</p>
       <div className="cw-card-ctas">
-        <Link className="btn btn-gold" to={`/services/${svc.slug}`}>Explore {svc.short} <Icon name="arrow" /></Link>
+        {/* The product name already sits in the h3 right above, so the CTA stays
+            a plain "Explore". The aria-label keeps it unique for screen readers,
+            which would otherwise announce eight identical "Explore" links. */}
+        <Link
+          className="btn btn-gold"
+          to={`/services/${svc.slug}`}
+          aria-label={`Explore ${svc.name}`}
+        >
+          Explore <Icon name="arrow" />
+        </Link>
       </div>
     </article>
   )

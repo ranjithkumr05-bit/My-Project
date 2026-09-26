@@ -242,6 +242,247 @@ async function main() {
       eq((await api('POST', '/api/auth/logout', { token })).status, 200, 'logout status')
       eq((await api('GET', '/api/rfqs', { token })).status, 401, 'after logout')
     })
+    section('3. public order tracker (no auth)')
+    await check('POST /api/track rejects missing fields (400)', async () => {
+      eq((await api('POST', '/api/track', { token: null, body: {} })).status, 400, 'empty body')
+      eq((await api('POST', '/api/track', { token: null, body: { orderId: 'ord-3001' } })).status, 400, 'missing contact')
+      eq((await api('POST', '/api/track', { token: null, body: { contact: 'buyer@greenfield.sample' } })).status, 400, 'missing orderId')
+    })
+    await check('POST /api/track returns generic 404 for unknown or mismatched', async () => {
+      const nf = await api('POST', '/api/track', { token: null, body: { orderId: 'ord-9999', contact: 'buyer@greenfield.sample' } })
+      eq(nf.status, 404, 'unknown id')
+      const mm = await api('POST', '/api/track', { token: null, body: { orderId: 'ord-3001', contact: 'wrong@example.com' } })
+      eq(mm.status, 404, 'contact mismatch')
+      has(mm.body.error || '', 'Order not found', 'generic message')
+    })
+    await check('POST /api/track returns sanitized tracking for a valid order', async () => {
+      const { status, body } = await api('POST', '/api/track', { token: null, body: { orderId: 'ORD-3001', contact: 'buyer@greenfield.sample' } })
+      eq(status, 200, 'status')
+      const t = body.tracking
+      eq(t.orderId, 'ord-3001', 'orderId')
+      eq(t.currentStage, 'stitching', 'currentStage')
+      eq(t.stageLabel, 'Stitching', 'stageLabel')
+      eq(t.progressPercent, 33, 'progress from withProgress')
+      eq(t.quantity, 600, 'qty from order')
+      truthy(t.productSummary, 'productSummary derived from linked rfq/product')
+      truthy(Array.isArray(t.timeline) && t.timeline.length === 7, '7 canonical stages')
+      eq(t.timeline[0].state, 'completed', 'past stage completed')
+      eq(t.timeline[2].state, 'in_progress', 'current stage in progress, not completed')
+      eq(t.timeline[3].state, 'upcoming', 'future stage upcoming')
+      truthy(t.timeline[0].at, 'past stage keeps stored at timestamp')
+      for (const k of ['customerId', 'adminNote', 'quotedTotal', 'rfq']) truthy(!(k in t), `no ${k} leaked`)
+    })
+    await check('POST /api/track accepts phone and hides dispatch when absent', async () => {
+      const { status, body } = await api('POST', '/api/track', { token: null, body: { orderId: 'ord-3001', contact: '+919000010001' } })
+      eq(status, 200, 'phone lookup works (digits-normalized)')
+      eq(body.tracking.dispatch, null, 'no courier fields on order → dispatch hidden')
+    })
+    await check('GET /api/orders/:id stays protected', async () => {
+      eq((await api('GET', '/api/orders/ord-3001', { token: null })).status, 401, 'anonymous blocked')
+    })
+
+  section('4. customer portal accounts (admin managed)')
+  const NEW_CUST = { email: 'portal@newco.test', name: 'Portal Owner', role: 'customer', customerId: 'c-1002', password: 'portal1234' }
+  const NEW_PW = 'rotated5678'
+  let createdUser = null
+
+  await check('admin creates a customer portal account', async () => {
+    const { status, body } = await api('POST', '/api/users', { token: TOKEN, body: NEW_CUST })
+    eq(status, 201, 'created')
+    eq(body.user.role, 'customer', 'role')
+    eq(body.user.email, NEW_CUST.email, 'email')
+    eq(body.user.customerId, 'c-1002', 'customerId')
+    eq(body.user.password, undefined, 'password must never be returned')
+    truthy(String(body.user.id).startsWith('u-'), 'id prefix')
+    createdUser = body.user
+  })
+
+  await check('the new account can log in (password was hashed at rest)', async () => {
+    const { status, body } = await api('POST', '/api/auth/login', { body: { email: NEW_CUST.email, password: NEW_CUST.password } })
+    eq(status, 200, 'login')
+    eq(body.user.id, createdUser.id, 'same user')
+  })
+
+  await check('user list never exposes a password or hash', async () => {
+    const { status, body } = await api('GET', '/api/users', { token: TOKEN })
+    eq(status, 200, 'list')
+    truthy(body.users.length >= 6, 'includes the new account')
+    for (const u of body.users) {
+      eq(u.password, undefined, `${u.id} has no password`)
+      truthy(!String(u.password || '').includes('scrypt'), 'no hash leaked')
+    }
+  })
+
+  await check('wrong password and unknown email fail identically', async () => {
+    const bad = await api('POST', '/api/auth/login', { body: { email: NEW_CUST.email, password: 'wrong-password' } })
+    const ghost = await api('POST', '/api/auth/login', { body: { email: 'ghost@nowhere.test', password: 'whatever12' } })
+    eq(bad.status, 401, 'wrong password')
+    eq(ghost.status, 401, 'unknown email')
+    eq(bad.body.error, ghost.body.error, 'must not reveal whether the account exists')
+    has(bad.body.error, 'Invalid email or password', 'generic message')
+  })
+
+  await check('duplicate email is rejected case-insensitively', async () => {
+    const { status, body } = await api('POST', '/api/users', {
+      token: TOKEN,
+      body: { ...NEW_CUST, email: NEW_CUST.email.toUpperCase(), customerId: 'c-1004' },
+    })
+    eq(status, 422, 'rejected')
+    has(body.error, 'already used', 'explains the clash')
+  })
+
+  await check('one customer may hold only one account', async () => {
+    const { status, body } = await api('POST', '/api/users', {
+      token: TOKEN,
+      body: { ...NEW_CUST, email: 'second@newco.test' },
+    })
+    eq(status, 422, 'rejected')
+    has(body.error, 'already has a portal account', 'explains the 1:1 rule')
+  })
+
+  await check('role must be customer — admin cannot be minted here', async () => {
+    const { status, body } = await api('POST', '/api/users', {
+      token: TOKEN,
+      body: { ...NEW_CUST, role: 'admin', email: 'sneaky@newco.test', customerId: 'c-1004' },
+    })
+    eq(status, 422, 'rejected')
+    has(body.error, 'admin accounts cannot be created here', 'explicit')
+  })
+
+  await check('customer role requires a valid customerId', async () => {
+    const missing = await api('POST', '/api/users', {
+      token: TOKEN, body: { email: 'nocust@newco.test', name: 'No Cust', role: 'customer', password: 'portal1234' },
+    })
+    eq(missing.status, 400, 'customerId required')
+    const bogus = await api('POST', '/api/users', {
+      token: TOKEN, body: { ...NEW_CUST, email: 'bogus@newco.test', customerId: 'c-9999' },
+    })
+    eq(bogus.status, 422, 'unknown customer rejected')
+  })
+
+  await check('password shorter than 8 characters is rejected', async () => {
+    const { status } = await api('POST', '/api/users', {
+      token: TOKEN, body: { ...NEW_CUST, email: 'weak@newco.test', customerId: 'c-1004', password: 'short' },
+    })
+    eq(status, 422, 'rejected')
+  })
+
+  await check('PATCH cannot change role', async () => {
+    const { status, body } = await api('PATCH', `/api/users/${createdUser.id}`, { token: TOKEN, body: { role: 'admin' } })
+    eq(status, 422, 'rejected')
+    has(body.error, 'role cannot be changed', 'explicit')
+  })
+
+  await check('password reset rotates the credential', async () => {
+    const { status, body } = await api('PATCH', `/api/users/${createdUser.id}`, { token: TOKEN, body: { password: NEW_PW } })
+    eq(status, 200, 'reset')
+    eq(body.user.password, undefined, 'no hash in the response')
+    eq((await api('POST', '/api/auth/login', { body: { email: NEW_CUST.email, password: NEW_CUST.password } })).status, 401, 'old password rejected')
+    eq((await api('POST', '/api/auth/login', { body: { email: NEW_CUST.email, password: NEW_PW } })).status, 200, 'new password works')
+  })
+
+  await check('blank password on PATCH leaves the credential alone', async () => {
+    await api('PATCH', `/api/users/${createdUser.id}`, { token: TOKEN, body: { name: 'Portal Owner', password: '' } })
+    eq((await api('POST', '/api/auth/login', { body: { email: NEW_CUST.email, password: NEW_PW } })).status, 200, 'still works')
+  })
+
+  await check('a customer account cannot be reassigned to a taken customer', async () => {
+    const { status, body } = await api('PATCH', `/api/users/${createdUser.id}`, { token: TOKEN, body: { customerId: 'c-1001' } })
+    eq(status, 422, 'rejected')
+    has(body.error, 'already has a portal account', 'explains the clash')
+  })
+
+  await check('user routes are admin-only', async () => {
+    // NB: the api helper falls back to the global TOKEN when no `token` is passed,
+    // so the buyer session has to be pulled off the response body explicitly.
+    const { body } = await api('POST', '/api/auth/login', { body: BUYER })
+    const buyerToken = body.token
+    eq((await api('GET', '/api/users', { token: buyerToken })).status, 403, 'customer cannot list')
+    eq((await api('POST', '/api/users', { token: buyerToken, body: NEW_CUST })).status, 403, 'customer cannot create')
+    eq((await api('PATCH', `/api/users/${createdUser.id}`, { token: buyerToken, body: { name: 'x' } })).status, 403, 'customer cannot patch')
+    eq((await api('DELETE', `/api/users/${createdUser.id}`, { token: buyerToken })).status, 403, 'customer cannot delete')
+    eq((await api('GET', '/api/users', { token: null })).status, 401, 'anonymous blocked')
+  })
+
+  await check('existing admin accounts still work and are untouched', async () => {
+    const { status, body } = await api('POST', '/api/auth/login', { body: ADMIN })
+    eq(status, 200, 'admin login')
+    eq(body.user.role, 'admin', 'still admin')
+    const second = await api('POST', '/api/auth/login', { body: { email: 'sales@customwear.sample', password: 'admin123' } })
+    eq(second.status, 200, 'second admin login')
+  })
+
+  await check('an admin cannot delete their own account', async () => {
+    const me = await api('GET', '/api/auth/me', { token: TOKEN })
+    const { status, body } = await api('DELETE', `/api/users/${me.body.user.id}`, { token: TOKEN })
+    eq(status, 422, 'rejected')
+    has(body.error, 'your own account', 'explicit')
+  })
+
+
+  await check('the last admin cannot be deleted', async () => {
+    // Retire every admin except the one holding the global TOKEN, so later checks
+    // keep a working admin session.
+    const me = await api('GET', '/api/auth/me', { token: TOKEN })
+    const list = await api('GET', '/api/users', { token: TOKEN })
+    const admins = list.body.users.filter((u) => u.role === 'admin')
+    truthy(admins.length >= 2, 'at least two admins in the seed data')
+    for (const a of admins.filter((u) => u.id !== me.body.user.id)) {
+      await api('DELETE', `/api/users/${a.id}`, { token: TOKEN })
+    }
+    const left = await api('GET', '/api/users', { token: TOKEN })
+    const remaining = left.body.users.filter((u) => u.role === 'admin')
+    eq(remaining.length, 1, 'exactly one admin left')
+    // With a single admin the survivor is also the caller, so the self-delete guard
+    // fires first; either way the last admin must survive and stay usable.
+    const del = await api('DELETE', `/api/users/${remaining[0].id}`, { token: TOKEN })
+    eq(del.status, 422, 'last admin survives')
+    const still = await api('GET', '/api/users', { token: TOKEN })
+    truthy(still.body.users.some((u) => u.id === remaining[0].id), 'admin still present')
+    eq((await api('GET', '/api/auth/me', { token: TOKEN })).status, 200, 'admin session still valid')
+  })
+
+  await check('DELETE revokes the account and its sessions', async () => {
+    const session = await api('POST', '/api/auth/login', { body: { email: NEW_CUST.email, password: NEW_PW } })
+    eq(session.status, 200, 'logged in first')
+    const { status, body } = await api('DELETE', `/api/users/${createdUser.id}`, { token: TOKEN })
+    eq(status, 200, 'deleted')
+    eq(body.deleted, createdUser.id, 'echoes the id')
+    eq((await api('GET', '/api/auth/me', { token: session.body.token })).status, 401, 'session revoked')
+    eq((await api('POST', '/api/auth/login', { body: { email: NEW_CUST.email, password: NEW_PW } })).status, 401, 'cannot log in again')
+  })
+
+  await check('public order tracking is unchanged by account management', async () => {
+    const good = await api('POST', '/api/track', { body: { orderId: 'ORD-3001', contact: 'buyer@greenfield.sample' } })
+    eq(good.status, 200, 'still resolves')
+    truthy(good.body.tracking.timeline.length > 0, 'timeline intact')
+    for (const k of ['customerId', 'adminNote', 'quotedTotal', 'rfq']) {
+      eq(k in good.body.tracking, false, `no ${k} leaked`)
+    }
+    eq((await api('POST', '/api/track', { body: { orderId: 'ord-9999', contact: 'buyer@greenfield.sample' } })).status, 404, 'unknown id still 404')
+  })
+
+  await check('customer management still works after account work', async () => {
+    const { status, body } = await api('GET', '/api/customers', { token: TOKEN })
+    eq(status, 200, 'customers list')
+    truthy(body.customers.length >= 6, 'customers intact')
+  })
+
+  // Kept last on purpose: tripping the limiter locks this IP out of /api/auth/login
+  // for 5 minutes, so no later check may depend on a fresh login.
+  await check('login rate limit trips on failures but not on success', async () => {
+    // Burn the budget with wrong passwords, then prove a CORRECT login is refused.
+    for (let i = 0; i < 12; i++) {
+      const r = await api('POST', '/api/auth/login', { body: { email: ADMIN.email, password: `nope-${i}` } })
+      eq(r.status, 401, `failure ${i} stays 401`)
+    }
+    const blocked = await api('POST', '/api/auth/login', { body: ADMIN })
+    eq(blocked.status, 401, 'correct credentials are now blocked')
+    eq(blocked.body.error, 'Invalid email or password', 'blocked reply stays generic')
+    // Existing sessions are unaffected - the limiter only guards the login route.
+    eq((await api('GET', '/api/auth/me', { token: TOKEN })).status, 200, 'live sessions keep working')
+  })
+
   } catch (err) {
     failures++
     process.stderr.write(`  FATAL ${err && err.stack ? err.stack : err}\n`)

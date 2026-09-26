@@ -28,6 +28,18 @@ export function logout(token) {
   return SESSIONS.delete(token)
 }
 
+/**
+ * Drop every in-memory session for a user. Needed when a credential changes or
+ * an account is revoked, otherwise an already-issued token keeps working.
+ */
+export function revokeUserSessions(userId) {
+  let n = 0
+  for (const [token, s] of SESSIONS) {
+    if (s.userId === userId) { SESSIONS.delete(token); n++ }
+  }
+  return n
+}
+
 export function currentUser(req) {
   const header = req.headers.authorization || ''
   const match = /^Bearer\s+(.+)$/i.exec(header.trim())

@@ -1,34 +1,73 @@
 ﻿// audit-uix.mjs â€” UI/UX audit sweep: all routes Ã— 5 viewports, rendered via Playwright.
 // Run from frontend/: node audit-uix.mjs   (BASE_URL env overrides the origin)
-import { chromium } from 'playwright'
+import {chromium} from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:5174'
 const SLUGS = [
-  'corporate-office-apparel', 'sportswear-team-jerseys', 'school-college-tshirts',
-  'workwear-staff-apparel', 'retail-store-apparel', 'hoodies-sweatshirts',
-  'group-event-tshirts', 'private-label',
+  'corporate-office-apparel',
+  'sportswear-team-jerseys',
+  'school-college-tshirts',
+  'workwear-staff-apparel',
+  'retail-store-apparel',
+  'hoodies-sweatshirts',
+  'group-event-tshirts',
+  'private-label',
 ]
-const ROUTES = ['/', '/about', '/services', ...SLUGS.map((s) => `/services/${s}`), '/process', '/portfolio', '/blog', '/contact']
+const ROUTES = [
+  '/',
+  '/about',
+  '/services',
+  ...SLUGS.map((s) => `/services/${s}`),
+  '/process',
+  '/portfolio',
+  '/blog',
+  '/contact',
+]
 const KNOWN = new Set(ROUTES)
 // /blog/:slug posts are real routes (Blog.jsx POSTS + router.jsx), so treat their
 // slugs as known destinations instead of flagging them as unknown links.
 const BLOG_SLUGS = [
-  'choosing-gsm-for-your-programme', 'why-sample-before-bulk',
-  'screen-print-vs-embroidery', 'what-is-in-a-tech-pack',
+  'choosing-gsm-for-your-programme',
+  'why-sample-before-bulk',
+  'screen-print-vs-embroidery',
+  'what-is-in-a-tech-pack',
 ]
 for (const s of BLOG_SLUGS) KNOWN.add(`/blog/${s}`)
-const VIEWPORTS = [[1440, 900], [1280, 800], [768, 1024], [390, 844], [360, 800]]
-const SHOT_ROUTES = new Set(['/', '/services', '/services/corporate-office-apparel', '/portfolio', '/blog', '/contact', '/process', '/about'])
+const VIEWPORTS = [
+  [1440, 900],
+  [1280, 800],
+  [768, 1024],
+  [390, 844],
+  [360, 800],
+]
+const SHOT_ROUTES = new Set([
+  '/',
+  '/services',
+  '/services/corporate-office-apparel',
+  '/portfolio',
+  '/blog',
+  '/contact',
+  '/process',
+  '/about',
+])
 const INTENTIONAL = /\/showcase\/gpt\/group-event\./
-const PROHIBITED = ['uniform', 'safety jacket', 'reflective', 'hi-vis', 'high-vis', 'tote bag', 'welcome kit']
+const PROHIBITED = [
+  'uniform',
+  'safety jacket',
+  'reflective',
+  'hi-vis',
+  'high-vis',
+  'tote bag',
+  'welcome kit',
+]
 
 const SHOTS = path.join(process.cwd(), 'audit-shots')
-fs.mkdirSync(SHOTS, { recursive: true })
+fs.mkdirSync(SHOTS, {recursive: true})
 
 const findings = []
-const add = (sev, route, vp, kind, detail) => findings.push({ sev, route, vp, kind, detail })
+const add = (sev, route, vp, kind, detail) => findings.push({sev, route, vp, kind, detail})
 
 // Computed WCAG checks: text contrast (4.5:1 normal / 3:1 large), focus-visible
 // style presence, and interactive target size. Runs in the page context.
@@ -123,21 +162,30 @@ const page = await browser.newPage()
 let consoleErrors = []
 let pageErrors = []
 let failedReqs = []
-page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()) })
+page.on('console', (m) => {
+  if (m.type() === 'error') consoleErrors.push(m.text())
+})
 page.on('pageerror', (e) => pageErrors.push(String(e)))
-page.on('requestfailed', (r) => { if (!INTENTIONAL.test(r.url())) failedReqs.push(`${r.method()} ${r.url()} :: ${r.failure()?.errorText}`) })
-page.on('response', (r) => { if (r.status() >= 400 && !INTENTIONAL.test(r.url())) failedReqs.push(`HTTP ${r.status()} ${r.url()}`) })
+page.on('requestfailed', (r) => {
+  if (!INTENTIONAL.test(r.url()))
+    failedReqs.push(`${r.method()} ${r.url()} :: ${r.failure()?.errorText}`)
+})
+page.on('response', (r) => {
+  if (r.status() >= 400 && !INTENTIONAL.test(r.url()))
+    failedReqs.push(`HTTP ${r.status()} ${r.url()}`)
+})
 
 async function fresh(route, w, h) {
-  consoleErrors = []; pageErrors = []; failedReqs = []
-  await page.setViewportSize({ width: w, height: h })
-  await page.goto(`${BASE}${route}`, { waitUntil: 'load' })
+  consoleErrors = []
+  pageErrors = []
+  failedReqs = []
+  await page.setViewportSize({width: w, height: h})
+  await page.goto(`${BASE}${route}`, {waitUntil: 'load'})
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
   await page.waitForTimeout(300)
   await page.evaluate(() => window.scrollTo(0, 0))
   await page.waitForTimeout(150)
 }
-
 
 for (const [w, h] of VIEWPORTS) {
   const vp = `${w}x${h}`
@@ -147,11 +195,28 @@ for (const [w, h] of VIEWPORTS) {
     const layout = await page.evaluate((vw) => {
       const de = document.documentElement
       const out = []
-      for (const sel of ['#main > *', '.cw-header > *', '.cw-footer > *', '.cw-cards > *', '.cw-work > *', '.cw-posts > *', '.cw-hero-inner > *', '.cw-grid2 > *', '.cw-strip > *', '.cw-filter > *', '.cw-cta-row > *']) {
+      for (const sel of [
+        '#main > *',
+        '.cw-header > *',
+        '.cw-footer > *',
+        '.cw-cards > *',
+        '.cw-work > *',
+        '.cw-posts > *',
+        '.cw-hero-inner > *',
+        '.cw-grid2 > *',
+        '.cw-strip > *',
+        '.cw-filter > *',
+        '.cw-cta-row > *',
+      ]) {
         for (const el of document.querySelectorAll(sel)) {
           const r = el.getBoundingClientRect()
           if (r.width === 0 && r.height === 0) continue
-          if (r.right > vw + 1 || r.left < -1) out.push({ sel: el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0], left: Math.round(r.left), right: Math.round(r.right) })
+          if (r.right > vw + 1 || r.left < -1)
+            out.push({
+              sel: el.tagName.toLowerCase() + '.' + String(el.className).split(' ')[0],
+              left: Math.round(r.left),
+              right: Math.round(r.right),
+            })
         }
       }
       return {
@@ -160,15 +225,22 @@ for (const [w, h] of VIEWPORTS) {
         hrefs: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')),
         // data-placeholder marks a link that is deliberately inert until its page exists
         // (footer Privacy/Terms); every other empty/# href is still a hard finding.
-        deadAnchors: [...document.querySelectorAll('a[href]')].filter((a) => !a.dataset.placeholder).map((a) => a.getAttribute('href')).filter((x) => !x || x === '#' || x === 'javascript:void(0)'),
-        headings: [...document.querySelectorAll('h1, h2, h3')].map((e) => [e.tagName, e.textContent.trim()]),
+        deadAnchors: [...document.querySelectorAll('a[href]')]
+          .filter((a) => !a.dataset.placeholder)
+          .map((a) => a.getAttribute('href'))
+          .filter((x) => !x || x === '#' || x === 'javascript:void(0)'),
+        headings: [...document.querySelectorAll('h1, h2, h3')].map((e) => [
+          e.tagName,
+          e.textContent.trim(),
+        ]),
         imgs: [...document.querySelectorAll('img')].map((i) => {
           const r = i.getBoundingClientRect()
           const cs = getComputedStyle(i)
           return {
             src: (i.currentSrc || i.src).replace(location.origin, ''),
             broken: i.complete && i.naturalWidth === 0,
-            rw: Math.round(r.width), rh: Math.round(r.height),
+            rw: Math.round(r.width),
+            rh: Math.round(r.height),
             fit: cs.objectFit,
             arRender: r.height ? +(r.width / r.height).toFixed(2) : 0,
             arNat: i.naturalHeight ? +(i.naturalWidth / i.naturalHeight).toFixed(2) : 0,
@@ -178,15 +250,22 @@ for (const [w, h] of VIEWPORTS) {
         h1Count: document.querySelectorAll('h1').length,
         mainOk: !!document.querySelector('#main'),
         bodyText: (document.querySelector('#main')?.innerText || '').toLowerCase(),
-        headerChildren: [...document.querySelectorAll('.cw-header > *')].filter((e) => getComputedStyle(e).display !== 'none').map((e) => {
-          const r = e.getBoundingClientRect()
-          return { t: (e.textContent || e.className || e.tagName).trim().slice(0, 24), l: Math.round(r.left), r: Math.round(r.right) }
-        }),
+        headerChildren: [...document.querySelectorAll('.cw-header > *')]
+          .filter((e) => getComputedStyle(e).display !== 'none')
+          .map((e) => {
+            const r = e.getBoundingClientRect()
+            return {
+              t: (e.textContent || e.className || e.tagName).trim().slice(0, 24),
+              l: Math.round(r.left),
+              r: Math.round(r.right),
+            }
+          }),
       }
     }, w)
 
     if (layout.overflow > 1) add('high', route, vp, 'h-overflow', `${layout.overflow}px`)
-    for (const o of layout.out) add('high', route, vp, 'out-of-bounds', `${o.sel} [${o.l}..${o.r}] vs vw ${w}`)
+    for (const o of layout.out)
+      add('high', route, vp, 'out-of-bounds', `${o.sel} [${o.l}..${o.r}] vs vw ${w}`)
     for (const d of layout.deadAnchors) add('high', route, vp, 'dead-link', d)
     if (layout.h1Count !== 1) add('med', route, vp, 'h1-count', String(layout.h1Count))
     if (!layout.mainOk) add('high', route, vp, 'landmark', 'missing #main')
@@ -195,9 +274,17 @@ for (const [w, h] of VIEWPORTS) {
     // function-string straight to page.evaluate returns the function object (which
     // serialises to undefined) instead of calling it.
     const a11y = await page.evaluate(([src, width]) => (0, eval)(src)(width), [A11Y_FN, w])
-    for (const c of a11y.contrast) add('high', route, vp, 'contrast', `${c.selector} "${c.text}" ${c.ratio}:1 < ${c.need}:1 (${c.color} on ${c.bg})`)
+    for (const c of a11y.contrast)
+      add(
+        'high',
+        route,
+        vp,
+        'contrast',
+        `${c.selector} "${c.text}" ${c.ratio}:1 < ${c.need}:1 (${c.color} on ${c.bg})`,
+      )
     for (const f of a11y.focus) add('med', route, vp, 'focus-visible', f.selector)
-    for (const t of a11y.targets) add('med', route, vp, 'touch-target', `${t.selector} ${t.w}x${t.h}`)
+    for (const t of a11y.targets)
+      add('med', route, vp, 'touch-target', `${t.selector} ${t.w}x${t.h}`)
 
     for (const href of new Set(layout.hrefs)) {
       if (/^(https?:|mailto:|tel:|#)/.test(href)) continue
@@ -216,19 +303,29 @@ for (const [w, h] of VIEWPORTS) {
     for (const im of layout.imgs) {
       if (im.broken && !INTENTIONAL.test(im.src)) add('high', route, vp, 'broken-img', im.src)
       if (im.rw === 0 || im.rh === 0) continue
-      if (im.fit === 'fill' && im.arNat && Math.abs(im.arRender - im.arNat) / im.arNat > 0.08) add('med', route, vp, 'distorted-img', `${im.src} render ${im.arRender} vs natural ${im.arNat}`)
+      if (im.fit === 'fill' && im.arNat && Math.abs(im.arRender - im.arNat) / im.arNat > 0.08)
+        add(
+          'med',
+          route,
+          vp,
+          'distorted-img',
+          `${im.src} render ${im.arRender} vs natural ${im.arNat}`,
+        )
       if (im.overTall) add('med', route, vp, 'oversized-img', `${im.src} ${im.rw}x${im.rh} (>70vh)`)
       if (im.rw > w + 1) add('high', route, vp, 'img-wider-than-vp', `${im.src} ${im.rw}px`)
     }
 
     for (let i = 0; i < layout.headerChildren.length; i++) {
       for (let j = i + 1; j < layout.headerChildren.length; j++) {
-        const a = layout.headerChildren[i], b = layout.headerChildren[j]
-        if (a.l < b.r && b.l < a.r) add('high', route, vp, 'header-overlap', `"${a.t}" âˆ© "${b.t}"`)
+        const a = layout.headerChildren[i],
+          b = layout.headerChildren[j]
+        if (a.l < b.r && b.l < a.r)
+          add('high', route, vp, 'header-overlap', `"${a.t}" âˆ© "${b.t}"`)
       }
     }
 
-    for (const bad of PROHIBITED) if (layout.bodyText.includes(bad)) add('high', route, vp, 'prohibited', bad)
+    for (const bad of PROHIBITED)
+      if (layout.bodyText.includes(bad)) add('high', route, vp, 'prohibited', bad)
 
     for (const e of pageErrors) add('high', route, vp, 'pageerror', e)
     for (const e of consoleErrors) add('high', route, vp, 'console-error', e.slice(0, 200))
@@ -236,17 +333,16 @@ for (const [w, h] of VIEWPORTS) {
 
     if (SHOT_ROUTES.has(route)) {
       const name = `${route === '/' ? 'home' : route.replace(/^\//, '').replace(/\//g, '-')}_${vp}.png`
-      await page.screenshot({ path: path.join(SHOTS, name), fullPage: true })
+      await page.screenshot({path: path.join(SHOTS, name), fullPage: true})
     }
 
     // Capture evidence when this route/viewport produced a high-severity finding.
     if (findings.some((f) => f.route === route && f.vp === vp && f.sev === 'high')) {
       const name = `FAIL_${route === '/' ? 'home' : route.replace(/^\//, '').replace(/\//g, '-')}_${vp}.png`
-      await page.screenshot({ path: path.join(SHOTS, name), fullPage: true })
+      await page.screenshot({path: path.join(SHOTS, name), fullPage: true})
     }
   }
 }
-
 
 // --- mobile menu behaviour at 360 ---
 {
@@ -255,26 +351,43 @@ for (const [w, h] of VIEWPORTS) {
   if (!burgerShown) add('high', '/', '360x800', 'mobile-menu', 'burger not visible at 360')
   else {
     await page.locator('.cw-burger').click()
-    if (!(await page.locator('.cw-nav.open').isVisible())) add('high', '/', '360x800', 'mobile-menu', 'nav did not open')
-    await page.locator('.cw-nav.open').getByRole('link', { name: 'Portfolio' }).click()
+    if (!(await page.locator('.cw-nav.open').isVisible()))
+      add('high', '/', '360x800', 'mobile-menu', 'nav did not open')
+    await page.locator('.cw-nav.open').getByRole('link', {name: 'Portfolio'}).click()
     await page.waitForTimeout(250)
-    if (!page.url().endsWith('/portfolio')) add('high', '/', '360x800', 'mobile-menu', `nav click landed on ${page.url()}`)
-    if (await page.locator('.cw-nav.open').count()) add('med', '/', '360x800', 'mobile-menu', 'nav stayed open after navigate')
+    if (!page.url().endsWith('/portfolio'))
+      add('high', '/', '360x800', 'mobile-menu', `nav click landed on ${page.url()}`)
+    if (await page.locator('.cw-nav.open').count())
+      add('med', '/', '360x800', 'mobile-menu', 'nav stayed open after navigate')
   }
 }
 
 // --- navigation integrity: every header/footer link resolves to its own page ---
 {
   await fresh('/', 1440, 900)
-  const links = await page.evaluate(() => [...document.querySelectorAll('.cw-header a[href], .cw-footer a[href]')].map((a) => ({ t: a.textContent.trim(), h: a.getAttribute('href'), ph: !!a.dataset.placeholder })))
-  for (const { t, h, ph } of links) {
+  const links = await page.evaluate(() =>
+    [...document.querySelectorAll('.cw-header a[href], .cw-footer a[href]')].map((a) => ({
+      t: a.textContent.trim(),
+      h: a.getAttribute('href'),
+      ph: !!a.dataset.placeholder,
+    })),
+  )
+  for (const {t, h, ph} of links) {
     // ph = deliberate placeholder (no page yet); tel: dials rather than routes.
     if (ph || /^(https?:|mailto:|tel:)/.test(h)) continue
     const dest = h.split('?')[0].replace(/\/$/, '') || '/'
-    if (!KNOWN.has(dest)) { add('high', '/header-footer', '1440x900', 'bad-nav-href', `${t} â†’ ${h}`); continue }
-    await page.goto(`${BASE}${h}`, { waitUntil: 'load' })
+    if (!KNOWN.has(dest)) {
+      add('high', '/header-footer', '1440x900', 'bad-nav-href', `${t} â†’ ${h}`)
+      continue
+    }
+    await page.goto(`${BASE}${h}`, {waitUntil: 'load'})
     await page.waitForTimeout(120)
-    const h1 = (await page.locator('h1').first().textContent().catch(() => '')) || ''
+    const h1 =
+      (await page
+        .locator('h1')
+        .first()
+        .textContent()
+        .catch(() => '')) || ''
     if (!h1.trim()) add('high', '/header-footer', '1440x900', 'nav-no-h1', `${t} â†’ ${h}`)
   }
 }
@@ -282,19 +395,30 @@ for (const [w, h] of VIEWPORTS) {
 // --- CTA flows ---
 {
   await fresh('/', 1440, 900)
-  const headerQuote = page.locator('.cw-nav a', { hasText: 'Get a Quote' })
-  if (!(await headerQuote.count())) add('high', '/', '1440x900', 'missing-cta', 'header Get a Quote absent')
+  const headerQuote = page.locator('.cw-nav a', {hasText: 'Get a Quote'})
+  if (!(await headerQuote.count()))
+    add('high', '/', '1440x900', 'missing-cta', 'header Get a Quote absent')
   else {
-    await headerQuote.click(); await page.waitForTimeout(200)
-    if (!page.url().includes('/contact?type=quote')) add('high', '/', '1440x900', 'cta-dest', `Get a Quote â†’ ${page.url()}`)
-    const kind = (await page.locator('.cw-kind label.on').textContent().catch(() => '')) || ''
-    if (!kind.includes('Get a Quote')) add('med', '/', '1440x900', 'cta-prefill', `quote chip state: "${kind}"`)
+    await headerQuote.click()
+    await page.waitForTimeout(200)
+    if (!page.url().includes('/contact?type=quote'))
+      add('high', '/', '1440x900', 'cta-dest', `Get a Quote â†’ ${page.url()}`)
+    const kind =
+      (await page
+        .locator('.cw-kind label.on')
+        .textContent()
+        .catch(() => '')) || ''
+    if (!kind.includes('Get a Quote'))
+      add('med', '/', '1440x900', 'cta-prefill', `quote chip state: "${kind}"`)
   }
   await fresh('/', 1440, 900)
-  await page.locator('a', { hasText: 'Request a Sample' }).first().click(); await page.waitForTimeout(200)
-  if (!page.url().includes('type=sample')) add('high', '/', '1440x900', 'cta-dest', `Request a Sample â†’ ${page.url()}`)
+  await page.locator('a', {hasText: 'Request a Sample'}).first().click()
+  await page.waitForTimeout(200)
+  if (!page.url().includes('type=sample'))
+    add('high', '/', '1440x900', 'cta-dest', `Request a Sample â†’ ${page.url()}`)
   await fresh('/services/private-label', 1440, 900)
-  if (!(await page.locator('a[href="/services"]').first().count())) add('high', '/services/private-label', '1440x900', 'missing-back', 'no Back to Services link')
+  if (!(await page.locator('a[href="/services"]').first().count()))
+    add('high', '/services/private-label', '1440x900', 'missing-back', 'no Back to Services link')
 }
 
 await browser.close()
@@ -305,10 +429,13 @@ for (const f of findings) {
   const k = `${f.kind} @ ${f.route} ${f.vp}`
   rollup[k] = (rollup[k] || 0) + 1
 }
-fs.writeFileSync(path.join(process.cwd(), 'audit-uix.report.json'), JSON.stringify({ count: findings.length, findings, rollup }, null, 2))
+fs.writeFileSync(
+  path.join(process.cwd(), 'audit-uix.report.json'),
+  JSON.stringify({count: findings.length, findings, rollup}, null, 2),
+)
 
 // Human-readable report for quick review without opening JSON.
-const sevOrder = { high: 0, med: 1, low: 2 }
+const sevOrder = {high: 0, med: 1, low: 2}
 const lines = [
   'Customwear UI/UX audit report',
   `Generated: ${new Date().toISOString()}`,

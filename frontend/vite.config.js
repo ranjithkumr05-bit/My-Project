@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react'
 
 // Dev proxy: /api -> local Customwear backend (default 4300, see root server.mjs).
@@ -13,5 +13,5 @@ export default defineConfig({
       },
     },
   },
-  build: { outDir: 'dist', sourcemap: false },
+  build: {outDir: 'dist', sourcemap: false},
 })

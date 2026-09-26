@@ -1,8 +1,14 @@
 import fs from 'fs'
-;['sportswear', 'hoodies'].forEach(k => {
+;['sportswear', 'hoodies'].forEach((k) => {
   const buf = fs.readFileSync(`public/showcase/${k}.jpg`)
   const head = buf.slice(0, 16)
-  console.log(k + '.jpg magic:', head.toString('hex').match(/.{1,2}/g).join(' '))
+  console.log(
+    k + '.jpg magic:',
+    head
+      .toString('hex')
+      .match(/.{1,2}/g)
+      .join(' '),
+  )
   console.log('  ascii:', JSON.stringify(head.toString('latin1')))
   // search for SOF markers anywhere
   for (let i = 0; i < buf.length - 9; i++) {

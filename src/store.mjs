@@ -24,6 +24,11 @@ if (PERSIST) {
     for (const key of ['rfqs', 'orders', 'leads', 'samples']) {
       if (Array.isArray(overlay[key])) operations[key] = overlay[key]
     }
+    // Customers seed from their own file, not from operations.json, so the
+    // overlay has to target customersDoc directly.
+    if (Array.isArray(overlay.customers)) customersDoc.customers = overlay.customers
+    // Same for accounts: user.password is already a scrypt hash here, never plaintext.
+    if (Array.isArray(overlay.users)) accountsDoc.users = overlay.users
   } catch {
     /* first run: no runtime file yet */
   }
@@ -46,7 +51,7 @@ export const RFQ_STATUSES = ['draft', 'submitted', 'in_review', 'quoted', 'accep
 export const ORDER_STATUSES = ['pending', 'in_production', 'on_hold', 'completed', 'cancelled']
 export const LEAD_STATUSES = ['new', 'contacted', 'qualified', 'won', 'lost']
 export const SAMPLE_STATUSES = ['requested', 'approved', 'in_production', 'shipped', 'delivered', 'rejected']
-export const LEAD_SOURCES = ['whatsapp', 'website_form', 'configurator', 'email', 'phone']
+export const LEAD_SOURCES = ['whatsapp', 'website_form', 'registration', 'configurator', 'email', 'phone']
 
 export const productById = (id) => store.products.find((p) => p.id === id) || null
 export const customerById = (id) => store.customers.find((c) => c.id === id) || null
@@ -120,7 +125,12 @@ export function validateItems(items) {
 
 export async function persist() {
   if (!PERSIST) return false
-  const payload = JSON.stringify({ rfqs: store.rfqs, orders: store.orders, leads: store.leads, samples: store.samples }, null, 2)
+  // customers + users included: admin can now create/edit them, the order tracker
+  // resolves the buyer's contact through customers, and portal logins live in users.
+  const payload = JSON.stringify({
+    rfqs: store.rfqs, orders: store.orders, leads: store.leads,
+    samples: store.samples, customers: store.customers, users: store.users,
+  }, null, 2)
   await writeFile(RUNTIME_FILE, payload)
   return true
 }

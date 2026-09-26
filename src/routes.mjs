@@ -5,7 +5,8 @@ import {
   productById, customerById, userById, RFQ_STATUSES, ORDER_STATUSES,
   LEAD_STATUSES, SAMPLE_STATUSES, LEAD_SOURCES,
 } from './store.mjs'
-import { login, logout, toPublicUser, requireAuth, requireRole, scopeToUser, SESSION_TTL_SECONDS } from './auth.mjs'
+import { login, logout, toPublicUser, requireAuth, requireRole, scopeToUser, revokeUserSessions, SESSION_TTL_SECONDS } from './auth.mjs'
+import { hashPassword } from './password.mjs'
 import { badRequest, notFound, unprocessable, forbidden, unauthorized } from './http.mjs'
 import { emit, EVENTS, webhookConfigured } from './notify.mjs'
 import { nowIso } from './http.mjs'
@@ -18,6 +19,81 @@ const mustBeIn = (value, allowed, field) => {
   if (!allowed.includes(value)) throw unprocessable(`"${value}" is not a valid ${field}. Allowed: ${allowed.join(', ')}`)
   return value
 }
+
+// Customer registered contact. These two rules mirror the tracker match in
+// POST /api/track exactly - email compared case-insensitively, phone by digits
+// with a 6-digit floor - so any contact accepted here is one the buyer can
+// actually verify on /track.
+const phoneDigits = (s) => String(s || '').replace(/\D/g, '')
+const isEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || '').trim())
+
+/**
+ * Resolve + validate a customer email/phone pair. Any field the body omits
+ * falls back to the current value, so PATCH can change one field alone.
+ * At least one contact is required: without it the customer can never pass
+ * order-tracking verification.
+ */
+const resolveContact = (body, current = {}) => {
+  const pick = (k) => (body[k] === undefined ? (current[k] || null) : (String(body[k]).trim() || null))
+  const email = pick('email')
+  const phone = pick('phone')
+  if (!email && !phone) {
+    throw unprocessable('A registered email or phone is required - the customer uses it to verify their orders')
+  }
+  if (email && !isEmail(email)) throw unprocessable(`"${email}" is not a valid email address`)
+  if (phone && phoneDigits(phone).length < 6) {
+    throw unprocessable('phone must contain at least 6 digits - that is the minimum the order tracker can match on')
+  }
+  return { email, phone }
+}
+
+/**
+ * Reject a contact already registered to a different customer. Both fields are
+ * tracker credentials, so a shared one would let two accounts verify each
+ * other's orders given an order id.
+ */
+const assertContactFree = (contact, selfId) => {
+  for (const [field, value] of Object.entries(contact)) {
+    if (!value) continue
+    const same = store.customers.find((c) => c.id !== selfId && (field === 'email'
+      ? String(c.email || '').trim().toLowerCase() === value.toLowerCase()
+      : phoneDigits(c.phone) === phoneDigits(value)))
+    if (same) throw unprocessable(`${field} "${value}" is already registered to ${same.company} (${same.id})`)
+  }
+}
+
+// ---- customer portal accounts -------------------------------------------------
+// user.email (login) and customer.email (order tracking) are deliberately
+// separate fields and are never synchronised: the tracker must keep working even
+// if the buyer's portal login lives at a different address.
+const PASSWORD_MIN = 8
+const CUSTOMER_ROLE = 'customer'
+
+const assertEmailFree = (email, selfId) => {
+  const clash = store.users.find((u) => u.id !== selfId
+    && String(u.email || '').trim().toLowerCase() === String(email).trim().toLowerCase())
+  if (clash) throw unprocessable(`email "${email}" is already used by account ${clash.id}`)
+}
+
+/** 1 customer : 1 portal account. */
+const assertCustomerFree = (customerId, selfId) => {
+  const clash = store.users.find((u) => u.id !== selfId && u.customerId === customerId)
+  if (clash) throw unprocessable(`${customerId} already has a portal account (${clash.id})`)
+}
+
+const readPassword = (raw) => {
+  const pw = String(raw ?? '')
+  if (pw.length < PASSWORD_MIN) throw unprocessable(`password must be at least ${PASSWORD_MIN} characters`)
+  return pw
+}
+
+/** Never let the last admin disappear - otherwise nobody can manage accounts. */
+const assertNotLastAdmin = (user) => {
+  if (user.role !== 'admin') return
+  const admins = store.users.filter((u) => u.role === 'admin')
+  if (admins.length <= 1) throw unprocessable('This is the last admin account — promote another admin before removing it')
+}
+
 
 const enrich = (rfq) => ({
   ...rfq,
@@ -46,6 +122,86 @@ const withProgress = (order) => {
     stageIndex: index,
     stageCount: list.length,
     progressPercent: list.length > 1 ? Math.round((index / (list.length - 1)) * 100) : 0,
+  }
+}
+
+// Ponytail: in-memory sliding window per IP, shared by every public limiter.
+// allowHits spends a slot per call (used by the tracker); login instead peeks
+// with hitsExhausted and only records on failure, so a good login is never rate limited.
+const clientIp = (req) => req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown'
+const prune = (map, ip, windowMs) => {
+  const now = Date.now()
+  const hits = (map.get(ip) || []).filter((t) => now - t < windowMs)
+  return { now, hits }
+}
+/** True when this IP is under `max` hits inside `windowMs`. */
+const allowHits = (req, map, max, windowMs) => {
+  const ip = clientIp(req)
+  const { now, hits } = prune(map, ip, windowMs)
+  if (hits.length >= max) return false
+  hits.push(now)
+  map.set(ip, hits)
+  return true
+}
+/** Has this IP already spent `max` slots? Records nothing. */
+const hitsExhausted = (req, map, max, windowMs) => prune(map, clientIp(req), windowMs).hits.length >= max
+/** Record one failure against this IP. */
+const recordHit = (req, map, windowMs) => {
+  const ip = clientIp(req)
+  const { now, hits } = prune(map, ip, windowMs)
+  hits.push(now)
+  map.set(ip, hits)
+}
+
+// Public tracker: unchanged budget — 30 requests / 60s / IP.
+const trackHits = new Map()
+const trackAllowed = (req) => allowHits(req, trackHits, 30, 60 * 1000)
+
+// Login: 10 FAILED attempts / 5 min / IP. Successes are free, and the reply is
+// always the same generic message, so this never reveals whether an account exists.
+const loginHits = new Map()
+const LOGIN_WINDOW_MS = 5 * 60 * 1000
+const LOGIN_MAX_FAILS = 10
+const loginBlocked = (req) => hitsExhausted(req, loginHits, LOGIN_MAX_FAILS, LOGIN_WINDOW_MS)
+const loginFailed = (req) => recordHit(req, loginHits, LOGIN_WINDOW_MS)
+
+/**
+ * Public tracking serializer — explicit allowlist only. Never returns the raw
+ * order object: no customerId, no rfq internals, no quoted totals, no notes.
+ * Product summary and dispatch come from linked records only when present.
+ */
+const toPublicTrackingResponse = (order) => {
+  const p = withProgress(order)
+  const list = stages()
+  const byStage = new Map((order.statusHistory || []).map((h) => [h.stage, h.at]))
+  const rfq = order.rfqId ? store.rfqs.find((r) => r.id === order.rfqId) : null
+  const firstItem = rfq?.items?.[0] || null
+  const product = firstItem ? productById(firstItem.productId) : null
+  const productSummary = product?.name || firstItem?.category || null
+  const quantity = Number.isFinite(Number(order.qty)) ? Number(order.qty) : null
+  const timeline = list.map((s, i) => ({
+    id: s.id,
+    label: s.label,
+    state: i < p.stageIndex ? 'completed' : i === p.stageIndex ? 'in_progress' : 'upcoming',
+    at: byStage.get(s.id) || null,
+  }))
+  const dispatch = (order.courier || order.tracking)
+    ? { courier: order.courier || null, trackingNumber: order.tracking || null }
+    : null
+  return {
+    orderId: order.id,
+    productSummary,
+    quantity,
+    status: order.status,
+    currentStage: order.stage,
+    stageLabel: p.stageLabel,
+    stageIndex: p.stageIndex,
+    stageCount: p.stageCount,
+    progressPercent: p.progressPercent,
+    expectedDelivery: order.dueDate || null,
+    createdAt: order.createdAt || null,
+    timeline,
+    dispatch,
   }
 }
 
@@ -126,10 +282,13 @@ export const routes = [
   // ---------- auth ----------
   {
     method: 'POST', path: '/api/auth/login',
-    handler: async ({ body }) => {
+    handler: async ({ req, body }) => {
       if (!body.email || !body.password) throw badRequest('email and password are required')
+      // A blocked IP gets the SAME message as a bad credential, so the limiter
+      // never reveals whether the email or account exists.
+      if (loginBlocked(req)) throw unauthorized('Invalid email or password')
       const session = login(body.email, body.password)
-      if (!session) throw unauthorized('Invalid email or password')
+      if (!session) { loginFailed(req); throw unauthorized('Invalid email or password') }
       return session
     },
   },
@@ -397,6 +556,28 @@ export const routes = [
     },
   },
   {
+    method: 'POST', path: '/api/track',
+    handler: ({ req, body }) => {
+      if (!trackAllowed(req)) throw unprocessable('Too many tracking attempts — please wait a minute and try again')
+      const orderId = String(body.orderId || '').replace(/^#/, '').trim().toLowerCase()
+      const contact = String(body.contact || '').trim()
+      if (!orderId) throw badRequest('Order ID is required')
+      if (!contact) throw badRequest('Registered email or phone is required')
+      // Ponytail: generic 404 for unknown id OR contact mismatch — no order enumeration.
+      const fail = () => notFound('Order not found. Check your order number and registered email or phone number.')
+      const order = store.orders.find((o) => String(o.id).toLowerCase() === orderId)
+      if (!order) throw fail()
+      const customer = customerById(order.customerId)
+      if (!customer) throw fail()
+      const norm = (s) => String(s || '').toLowerCase()
+      const digits = (s) => String(s || '').replace(/\D/g, '')
+      const emailOk = norm(contact) === norm(customer.email)
+      const phoneOk = contact && digits(contact).length >= 6 && digits(contact) === digits(customer.phone)
+      if (!emailOk && !phoneOk) throw fail()
+      return { tracking: toPublicTrackingResponse(order) }
+    },
+  },
+  {
     method: 'PATCH', path: '/api/orders/:id/stage',
     handler: async ({ req, params, body }) => {
       requireRole(req, 'admin')
@@ -437,10 +618,15 @@ export const routes = [
       if (rfq.status === 'converted') throw unprocessable('This RFQ has already been converted to an order')
       if (!['accepted', 'quoted'].includes(rfq.status)) throw unprocessable(`Only accepted or quoted RFQs can be converted (current status: ${rfq.status})`)
       const qty = Number(body.qty) || rfq.items.reduce((s, i) => s + Number(i.qty || 0), 0)
+      // Optional explicit customer. Defaults to the RFQ's own customer so the
+      // existing flow is unchanged; an admin can only override it to a customer
+      // that actually exists - nothing is guessed or auto-matched.
+      const customerId = body.customerId === undefined ? rfq.customerId : String(body.customerId)
+      if (!customerById(customerId)) throw unprocessable(`Unknown customer "${customerId}"`)
       const order = {
         id: nextId(store.orders, 'ord-'),
         rfqId: rfq.id,
-        customerId: rfq.customerId,
+        customerId,
         qty,
         status: 'pending',
         stage: 'sourcing',
@@ -451,7 +637,7 @@ export const routes = [
       store.orders.unshift(order)
       rfq.status = 'converted'
       await persist()
-      await emit('order.created_from_rfq', { orderId: order.id, rfqId: rfq.id, customerId: rfq.customerId, qty })
+      await emit('order.created_from_rfq', { orderId: order.id, rfqId: rfq.id, customerId, qty })
       return withStatus(201, { order: withProgress(order), rfq: enrich(rfq) })
     },
   },
@@ -563,6 +749,35 @@ export const routes = [
     },
   },
   {
+    // Admin book-of-business entry. A registered contact is mandatory because
+    // POST /api/track resolves the buyer's email/phone through this record.
+    method: 'POST', path: '/api/customers',
+    handler: async ({ req, body }) => {
+      requireRole(req, 'admin')
+      const company = String(body.company || '').trim()
+      if (!company) throw badRequest('company is required')
+      const contact = resolveContact(body)
+      assertContactFree(contact, null)
+      const text = (k) => (String(body[k] || '').trim() || null)
+      const customer = {
+        id: nextId(store.customers, 'c-'),
+        company,
+        contactName: text('contactName'),
+        email: contact.email,
+        phone: contact.phone,
+        city: text('city'),
+        country: text('country') || 'IN',
+        tier: text('tier') || 'standard',
+        since: new Date().toISOString().slice(0, 10),
+      }
+      store.customers.push(customer)
+      await persist()
+      await emit('customer.created', { customerId: customer.id, company: customer.company, email: customer.email, phone: customer.phone })
+      return withStatus(201, { customer })
+    },
+  },
+
+  {
     // Must stay above '/api/customers/:id' so "me" is not parsed as an id.
     method: 'GET', path: '/api/customers/me',
     handler: ({ req }) => {
@@ -582,6 +797,148 @@ export const routes = [
       return { customer, contacts, dashboard: customerDashboard(customer.id) }
     },
   },
+  {
+    // Admin-only contact maintenance. Order tracking verifies against
+    // customer.email / customer.phone, so these are the fields an admin has to
+    // be able to correct; id and since stay immutable.
+    method: 'PATCH', path: '/api/customers/:id',
+    handler: async ({ req, params, body }) => {
+      requireRole(req, 'admin')
+      const customer = customerById(params.id)
+      if (!customer) throw notFound(`No customer with id "${params.id}"`)
+      const contact = resolveContact(body, customer)
+      assertContactFree(contact, customer.id)
+      if (body.company !== undefined) {
+        const company = String(body.company).trim()
+        if (!company) throw badRequest('company cannot be empty')
+        customer.company = company
+      }
+      const text = (k) => (body[k] === undefined ? customer[k] : (String(body[k]).trim() || null))
+      customer.contactName = text('contactName')
+      customer.email = contact.email
+      customer.phone = contact.phone
+      customer.city = text('city')
+      customer.country = text('country')
+      if (body.tier !== undefined) customer.tier = String(body.tier).trim() || customer.tier
+      await persist()
+      await emit('customer.updated', { customerId: customer.id, company: customer.company, email: customer.email, phone: customer.phone })
+      return { customer }
+    },
+  },
+
+  // ---------- customer portal accounts (admin manages, customers only log in) ----------
+  {
+    method: 'GET', path: '/api/users',
+    handler: ({ req }) => {
+      requireRole(req, 'admin')
+      return {
+        total: store.users.length,
+        users: store.users.map((u) => ({
+          ...toPublicUser(u),
+          customer: u.customerId ? (customerById(u.customerId)?.company || u.customerId) : null,
+          customerEmail: u.customerId ? (customerById(u.customerId)?.email || null) : null,
+        })),
+      }
+    },
+  },
+  {
+    // Customer portal accounts only. An admin must never be minted here, so role
+    // is forced to "customer" and any other value is rejected outright.
+    method: 'POST', path: '/api/users',
+    handler: async ({ req, body }) => {
+      requireRole(req, 'admin')
+      if (body.role !== undefined && body.role !== CUSTOMER_ROLE) {
+        throw unprocessable(`role must be "${CUSTOMER_ROLE}" — admin accounts cannot be created here`)
+      }
+      const email = String(body.email || '').trim()
+      if (!email) throw badRequest('email is required')
+      if (!isEmail(email)) throw unprocessable(`"${email}" is not a valid email address`)
+      assertEmailFree(email, null)
+      const name = String(body.name || '').trim()
+      if (!name) throw badRequest('name is required')
+      const customerId = String(body.customerId || '').trim()
+      if (!customerId) throw badRequest('customerId is required')
+      if (!customerById(customerId)) throw unprocessable(`Unknown customer "${customerId}"`)
+      assertCustomerFree(customerId, null)
+      const password = readPassword(body.password)
+      const user = {
+        // 'u-cust-' continues the existing naming; plain 'u-' would yield "u-1"
+        // because the seed ids (u-admin-1, u-cust-1) do not parse as numbers.
+        id: nextId(store.users, 'u-cust-'),
+        role: CUSTOMER_ROLE,
+        name,
+        email,
+        customerId,
+        password: hashPassword(password),
+      }
+      store.users.push(user)
+      await persist()
+      // No password or hash in the event payload.
+      await emit('user.created', { userId: user.id, customerId, email, role: user.role })
+      return withStatus(201, { user: toPublicUser(user) })
+    },
+  },
+  {
+    // No role change here by design: admin demotion is not supported, which is
+    // what keeps this endpoint from ever being able to create one.
+    method: 'PATCH', path: '/api/users/:id',
+    handler: async ({ req, params, body }) => {
+      requireRole(req, 'admin')
+      const user = userById(params.id)
+      if (!user) throw notFound(`No user with id "${params.id}"`)
+      if (body.role !== undefined && body.role !== user.role) {
+        throw unprocessable('role cannot be changed here')
+      }
+      if (body.email !== undefined) {
+        const email = String(body.email).trim()
+        if (!email) throw unprocessable('email cannot be empty')
+        if (!isEmail(email)) throw unprocessable(`"${email}" is not a valid email address`)
+        assertEmailFree(email, user.id)
+        user.email = email
+      }
+      if (body.name !== undefined) {
+        const name = String(body.name).trim()
+        if (!name) throw unprocessable('name cannot be empty')
+        user.name = name
+      }
+      if (body.customerId !== undefined) {
+        const customerId = String(body.customerId).trim()
+        if (!customerId) throw unprocessable('customerId cannot be empty')
+        if (!customerById(customerId)) throw unprocessable(`Unknown customer "${customerId}"`)
+        assertCustomerFree(customerId, user.id)
+        user.customerId = customerId
+      }
+      let passwordChanged = false
+      // Blank / omitted means unchanged, so an edit never needs the current password.
+      if (body.password !== undefined && String(body.password).trim() !== '') {
+        user.password = hashPassword(readPassword(body.password))
+        passwordChanged = true
+      }
+      if (passwordChanged) revokeUserSessions(user.id)
+      await persist()
+      await emit('user.updated', { userId: user.id, customerId: user.customerId, email: user.email, role: user.role })
+      return { user: toPublicUser(user) }
+    },
+  },
+  {
+    // Permanent removal: the schema has no active/deactivated flag, and inventing
+    // one would change the account model.
+    method: 'DELETE', path: '/api/users/:id',
+    handler: async ({ req, params }) => {
+      const actor = requireRole(req, 'admin')
+      const user = userById(params.id)
+      if (!user) throw notFound(`No user with id "${params.id}"`)
+      if (user.id === actor.id) throw unprocessable('You cannot delete your own account')
+      assertNotLastAdmin(user)
+      store.users = store.users.filter((u) => u.id !== user.id)
+      revokeUserSessions(user.id)
+      await persist()
+      await emit('user.deleted', { userId: user.id, customerId: user.customerId, role: user.role })
+      return { deleted: user.id }
+    },
+  },
+
+
 
   // ---------- sample requests ----------
   {
